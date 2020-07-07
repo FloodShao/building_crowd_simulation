@@ -1,10 +1,11 @@
 from collections import Iterable
 import sys
-from vector import Vector2d
-from vertex import Vertex, VertexManager
-from edge import Edge, EdgeManager
-from obstacle import Obstacle, ObstacleManager
+import os
 
+from .vector import Vector2d
+from .vertex import Vertex, VertexManager
+from .edge import Edge, EdgeManager
+from .obstacle import Obstacle, ObstacleManager
 
 def calIntersectVertexFromLaneVector(lane_vector, id0, id1, orign_point):
     ## calculate the intersection vertex within the area from vector0 to vector1, mind the sequence
@@ -17,7 +18,8 @@ def calIntersectVertexFromLaneVector(lane_vector, id0, id1, orign_point):
     vector1 = lane_vector[id1][1]
 
     ## special case with 2 lanes are parallel, use the mid point as the intersection point
-    if(vector0.getDot(vector1.getNormalUnit()) == 0) :
+    # note that when 2 lanes are nearly parallel, not using the special case might cause rediculous result.
+    if(abs( vector0.getUnit().getDot(vector1.getNormalUnit()) ) < 0.1) :
         length = (lane0_width + lane1_width) / 2
         ## vector0 x result_vector must be > 0
         result_x = length * vector0.getNormalUnit().x
@@ -487,18 +489,19 @@ class FileWriter:
         self.polygonManager = polygonManager
 
     def generateNavMesh(self):
+        print("Generating: ", self.filename)
         # vertex part
-        print("Write vertices...")
+        print("Writing vertices...")
         self.writeLine(self.vertexManager.getSize())
         for i in range(self.vertexManager.getSize()):
             v = self.vertexManager.getVertex(i)
-            print(v.getId(), v.getCoords())
+            # print(v.getId(), v.getCoords())
             self.writeLine(v.getCoords())
         self.writeLine(" ")
         
         # edge part
         print("complete.")
-        print("Write edges...")
+        print("Writing edges...")
         self.writeLine(self.edgeManager.getSize())
         for i in range(self.edgeManager.getSize()):
             e = self.edgeManager.getEdge(i)
@@ -507,7 +510,7 @@ class FileWriter:
 
         # obstacle part
         print("complete.")
-        print("Write obstalces...")
+        print("Writing obstalces...")
         self.writeLine(self.obstacleManager.getSize())
         for i in range(self.obstacleManager.getSize()):
             o = self.obstacleManager.getObstacle(i)
@@ -516,7 +519,7 @@ class FileWriter:
 
         # polygon part
         print("complete.")
-        print("Write node...")
+        print("Writing node...")
         # nodes name
         self.filehandle.write("walkable")
         self.filehandle.write("\n")
@@ -550,8 +553,3 @@ class FileWriter:
                 self.writeLine(0)
             # blank
             self.writeLine(" ")
-
-
-
-            
-        

@@ -1,11 +1,14 @@
 from setuptools import setup
 
-package_name = 'building_navmesh_test'
+package_name = 'building_navmesh_tools'
 
 setup(
     name=package_name,
     version='0.0.0',
-    packages=[package_name],
+    packages=[
+        'building_navmesh',
+        'navmesh_generator'
+    ],
     data_files=[
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
@@ -13,8 +16,8 @@ setup(
     ],
     install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='root',
-    maintainer_email='root@todo.todo',
+    maintainer='fred',
+    maintainer_email='fred.guoliang.shao@gmail.com',
     description='TODO: Package description',
     license='TODO: License declaration',
     tests_require=['pytest'],
