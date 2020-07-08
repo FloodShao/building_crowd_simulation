@@ -1,29 +1,106 @@
 import yaml
 import sys
 import os
+import copy
 
 from building_navmesh.build_navmesh import BuildNavmesh
+from parsing_map.vertex import Vertex
+from parsing_map.edge import Edge
+from parsing_map.transform import Transform
 
 class NavmeshGenerator:
-    def __init__(self, vertices, lanes, graph_idx):
-        self._vertices_raw = vertices
-        self._lanes_raw = lanes
-        self._graph_idx = graph_idx
+    '''Generate navmesh for one level based on 'human_lanes' '''
+    def __init__(self, level_yaml_node, name):
+        self._name = name
+        print("Parsing yaml for level: ", name)
+
+        # z base
+        self._elevation = 0.0
+        if 'elevation' in level_yaml_node :
+            self._elevation = float(level_yaml_node['elevation'])
+
+        # y coordinates set to negative in Vertex
+        self._vertices_raw = []
+        if 'vertices' in level_yaml_node and level_yaml_node['vertices'] :
+            for vertex_raw in level_yaml_node['vertices'] :
+                self._vertices_raw.append(Vertex(vertex_raw))
+        
+        self._transformed_vertices = []
+
+        self._transform = Transform()
+        # parse measurement for scaling
+        self._meas = []
+        if 'measurements' in level_yaml_node :
+            self._meas = self.parse_edge_sequence(level_yaml_node['measurements'])
+            for meas in self._meas:
+                meas.calc_statistics(self._vertices_raw)
+        
+        # calculate scale and transform all the vertices
+        self.calculate_scale_using_measurements()
+        self.transform_all_vertices()
+        
+        # parse human lanes
+        self._human_lanes_raw = []
+        if 'human_lanes' in level_yaml_node and level_yaml_node['human_lanes'] :
+            self._human_lanes_raw = self.parse_edge_sequence(level_yaml_node['human_lanes'])
+        else :
+            raise ValueError('expected more than 1 human lanes to generate navmesh')
+
+        # default graph idx = 0
+        self._cur_graph_idx = 0
+
+    def parse_edge_sequence(self, sequence_yaml):
+        edges = []
+        for edge_yaml in sequence_yaml:
+            edges.append(Edge(edge_yaml))
+        return edges
+
+
+    def calculate_scale_using_measurements(self):
+        # use the measurements to estimate scale for this level
+        scale_cnt = 0
+        scale_sum = 0
+        for m in self._meas:
+            scale_cnt += 1
+            scale_sum += m.params['distance'].value / m.length
+        if scale_cnt > 0:
+            self._transform.set_scale(scale_sum / float(scale_cnt))
+            print(f'level {self._name} scale: {self._transform.scale}')
+        else:
+            self._transform.set_scale(1.0)
+            print('WARNING! No measurements defined. Scale is indetermined.')
+            print('         Nav graph generated in pixel units, not meters!')
+
+
+    def transform_all_vertices(self):
+        self._transformed_vertices = []
+
+        for vertex_raw in self._vertices_raw :
+            v = copy.deepcopy(vertex_raw)
+            transformed = self._transform.transform_point(v.xy())
+            v.x, v.y = transformed
+            v.z = self._elevation # set the z coordinate as the level z base
+            self._transformed_vertices.append(v)
+    
+    def set_graph_idx(self, graph_idx):
+        self._cur_graph_idx = graph_idx
+
+    # load all the transformed vertices and human lanes to building_navmesh interface
+    def Load(self):
         self._navmeshManager = BuildNavmesh()
 
         lane_vertices_number = self.LoadLaneVertices()
         print("Load lane vertices of ", lane_vertices_number)
         
-        lane_number = self.LoadLanes()        
-        if lane_number <= 0:
-            print("Error loading human lanes")
-            return
+        lane_number = self.LoadHumanLanes()        
+        if lane_number <= 0 :
+            raise ValueError("loaded 0 human lanes. Error in loading human lanes.")
         print("Load human lanes of", lane_number)
 
     
     # wrap up building_navmesh api
-    def AddLaneVertex(self, px, py):
-        self._navmeshManager.AddLaneVertex(px, py)
+    def AddLaneVertex(self, vertex_xy):
+        self._navmeshManager.AddLaneVertex(vertex_xy[0], vertex_xy[1])
 
     def AddLane(self, idx0, idx1, width):
         self._navmeshManager.AddLane(idx0, idx1, width)
@@ -37,35 +114,34 @@ class NavmeshGenerator:
     # add all lane vertices  
     def LoadLaneVertices(self):
         count = 0
-        for v in self._vertices_raw:
-            if v[2] != self._graph_idx:
-                continue
-            self.AddLaneVertex(v[0], v[1])
+        for v in self._transformed_vertices:
+            self.AddLaneVertex(v.xy())
             count += 1
         self._lane_vertices_number = count
         return count
 
-    def LoadLanes(self):
+    def LoadHumanLanes(self):
         count = 0
-        for l in self._lanes_raw:
-            if l[2]['graph_idx'][1] != self._graph_idx:
+        for l in self._human_lanes_raw:
+            if int(l.params['graph_idx'].value) != self._cur_graph_idx :
                 continue
-            # make sure the width is double
-            width = l[2]['width'][1] / 1.0
+            # get the width of human lanes
+            width = l.width()
             
-            if l[0] > self._lane_vertices_number or l[1] > self._lane_vertices_number :
-                print("Error load lanes for lane, [vertices_idx over stored vertices_number]", l)
-                return -1
+            if l.start_idx > self._lane_vertices_number or l.end_idx > self._lane_vertices_number :
+                print("Error load lanes for lane, vertices_idx over stored vertices_number. [", l.start_idx, ",", l.end_idx, "]" )
+                raise ValueError("edge is referencing invalid vertex.")
                         
-            self.AddLane(l[0], l[1], width)
+            self.AddLane(l.start_idx, l.end_idx, width)
             count += 1
-        self._lane_number = count
-        return count
 
+        self._lanes_number = count
+        return count
 
 class BuildingYamlParse:
     
     def __init__(self, map_path):
+        
         self._building_file = map_path
         with open(self._building_file) as f :
             _yaml_raw = yaml.load(f, yaml.SafeLoader)
@@ -77,6 +153,9 @@ class BuildingYamlParse:
         
         self._level_number = len(self._level_raw)
         self._level_keys = list(self._level_raw.keys())
+
+    def GeteRawData(self):
+        return self._level_raw
 
     def GetLevelRawData(self, level_id):
         if level_id > self._level_number :
@@ -121,15 +200,15 @@ def main():
     yaml_parse = BuildingYamlParse(map_path)
 
     for level_name in yaml_parse._level_keys :
-        output_file = output_folder_path + level_name + "_navmesh.nav"
-        vertices = yaml_parse.GetLevelRawDataFromKey(level_name)['vertices']
-        human_lanes = yaml_parse.GetLevelRawDataFromKey(level_name)['human_lanes']
-        
+        output_file = output_folder_path + '/' + level_name + "_navmesh.nav"
+        level_yaml_node = yaml_parse.GeteRawData()[level_name]
+        name = level_name
+
         # TODO, add graph_id support
-        navmesh_generator = NavmeshGenerator(vertices, human_lanes, 0)
+        navmesh_generator = NavmeshGenerator(level_yaml_node, name)
+        navmesh_generator.Load()
         navmesh_generator.Generate()
         navmesh_generator.Output(output_file)
-
 
 if __name__ == "__main__":
     sys.exit(main())

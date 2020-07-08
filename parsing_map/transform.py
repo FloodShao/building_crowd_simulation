@@ -1,5 +1,5 @@
 import math
-import numpy
+import numpy as np
 
 '''Mocked from building_map_tools in traffic_editor, to process 2D rotation, scaling and transformation'''
 class Transform:
