@@ -7,6 +7,7 @@ setup(
     version='0.0.0',
     packages=[
         'building_navmesh',
+        'parsing_map',
         'navmesh_generator'
     ],
     data_files=[
@@ -14,7 +15,7 @@ setup(
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
     ],
-    install_requires=['setuptools'],
+    install_requires=['setuptools', 'shapely', 'pyyaml'],
     zip_safe=True,
     maintainer='fred',
     maintainer_email='fred.guoliang.shao@gmail.com',
@@ -23,6 +24,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            'navmesh_generator = '
+            'navmesh_generator.navmesh_generator:main',
         ],
     },
 )
