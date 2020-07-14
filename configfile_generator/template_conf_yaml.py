@@ -1,12 +1,5 @@
 from .behavior_file import *
 
-class ConfigureYAML:
-
-    def __init__(self) :
-        self._states = []
-        self._transitions = []
-        self._goalSet = []
-
     
 class StateYAML:
 

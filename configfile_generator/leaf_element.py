@@ -7,12 +7,12 @@ class LeafElement:
         self._attrib = {}
         self._text = None
         
-    def addAttrib(self, key, value) :
+    def addAttribute(self, key, value) :
         self._attrib[str(key)] = str(value)
 
     def setAttributes(self, attributes) :
         for key in attributes:
-            self.addAttrib(key, attributes[key])
+            self.addAttribute(key, attributes[key])
 
     def addText(self, text):
         self._text = str(text)
@@ -21,4 +21,24 @@ class LeafElement:
         root = ET.Element(self._name, self._attrib)
         if self._text :
             root.text = self._text
+        return root
+
+
+class Element (LeafElement):
+    def __init__(self, name):
+        LeafElement.__init__(self, name)
+        self._subElements = []
+
+    def addSubElement(self, element) :
+        if not hasattr(element, "outputXmlElement"):
+            raise ValueError(self._name + "does not have method 'outputXmlElement' ")
+        
+        self._subElements.append(element)
+    
+    def outputXmlElement(self):
+        root = ET.Element(self._name, self._attrib)
+
+        for element in self._subElements :
+            root.append(element.outputXmlElement())
+        
         return root
