@@ -9,3 +9,7 @@ transitions:
 goal_sets:
   - { name: '1', area: {'common', 'conf'}}
   - { name: '2', area: {'common'} }
+
+goal:
+  - [1, 2, 3]
+  

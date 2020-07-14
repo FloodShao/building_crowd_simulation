@@ -38,10 +38,10 @@ class BehaviorState :
         self._final = False
     
     def outputXmlElement(self) :
-        if(not self._name or self._goalSelector or self._velComponent) :
+        if(not self._name or not self._goalSelector or not self._velComponent) :
             raise ValueError("Incomplete element for State.")
         
-        root = Element('State')
+        root = ET.Element('State')
         
         # attribute
         if self._final : 
@@ -52,11 +52,11 @@ class BehaviorState :
 
         goal_selector_xml = LeafElement('GoalSelector')
         goal_selector_xml.setAttributes(self._goalSelector.getAttributes())
-        root.append(goal_selector_xml)
+        root.append(goal_selector_xml.outputXmlElement())
 
         vel_component_xml = LeafElement('VelComponent')
         vel_component_xml.setAttributes(self._velComponent.getAttributes())
-        root.append(vel_component_xml)
+        root.append(vel_component_xml.outputXmlElement())
         
         return root
 
@@ -108,11 +108,23 @@ class StateTransition :
         else :
             raise ValueError("The transition FromState provided is not a xml element")
 
+    def setFromStateName(self, state_name) :
+        if len( state_name ) > 0 :
+            self._fromStateName = state_name
+        else :
+            raise ValueError("Invalid state name for state transition")
+
     def setToState(self, state):
         if state.getStateName() != None :
             self._toStateName = state.getStateName()
         else :
             raise ValueError("The transition ToState provided is not a xml element")
+    
+    def setToStateName(self, state_name) :
+        if len( state_name ) > 0 :
+            self._toStateName = state_name
+        else :
+            raise ValueError("Invalid state name for state transition")
 
     def setCondition(self, condition) :
         if condition.getConditionDistance() != None :
@@ -130,7 +142,7 @@ class StateTransition :
 
         condition_xml = LeafElement('Condition')
         condition_xml.setAttributes(self._condition.getAttributes())
-        root.append(condition_xml)
+        root.append(condition_xml.outputXmlElement())
         return root
 
 
@@ -156,12 +168,24 @@ class TransitionCondition:
 
 class GoalSet : 
 
-    def __init__(self, id) :
-        self._id = id
+    def __init__(self) :
+        self._id = None
         self._goalList = []
+        self._goal_area = set()
+        self._capacity = 1
+
+    def setId(self, id) :
+        self._id = str(id)
     
+    def addGoalArea(self, area) :
+        self._goal_area.add(area)
+
+    def setCapacity(self, capacity) :
+        self._capacity = capacity
+
     def addGoal(self, goal) :
         goal.setId( len(self._goalList) )
+        self._goalList.append(goal)
 
     def outputXmlElement(self) :
         root = ET.Element('GoalSet', {'id' : self._id})
@@ -223,7 +247,7 @@ class BehaviorFile :
     def addState(self, State) :
         self._states.append(State)
 
-    def addTransitions(self, Transition) :
+    def addTransition(self, Transition) :
         self._transitions.append(Transition)
 
     def addGoalSet(self, GoalSet) :

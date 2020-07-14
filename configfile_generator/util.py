@@ -29,7 +29,7 @@ def writeXmlFile(root_element, output_dir = '', file_name = 'behavior_file.xml')
     prettyXml(root_element, '\t', '\n')
     
     ET.dump(root_element)
-    tree = ElementTree(root_element)
+    tree = ET.ElementTree(root_element)
 
     if len(output_dir) == 0:
         print("Warning: 'output_dir' is not specified. Write file to ", os.getcwd())
@@ -38,6 +38,44 @@ def writeXmlFile(root_element, output_dir = '', file_name = 'behavior_file.xml')
         print("Generat", file_name, "to ", output_dir)
 
     tree.write(output_dir + '/behavior_file.xml', encoding='utf-8')
+
+def templateYamlFile(level_name, tree, output_file) :
+    filehandle = open(output_file, "a")
+    newline = '\n'
+    indent = ' '
+    
+    indent_level = 0
+    templatePrettyYaml(filehandle, indent_level, level_name + ":")
+    indent_level = indent_level + 1
+
+    for key in tree :
+        # print key
+        templatePrettyYaml(filehandle, indent_level, key + ":")
+        items = tree[key]
+        for item in items:
+            if key == "goals" :
+                content_text = "- [" + str(item.x) + ", " + str(item.y) + ", " + str(item.z) + ", " + str(item.name) + "]"
+            elif key == "goal_area" :
+                content_text = "- " + item
+            else:
+                content_text = "- {"
+                for k in item :
+                    content_text += k + ": " + str(item[k]) + ", "
+                content_text = content_text[0:-2] # delete the last ", "
+                content_text += "}"
+
+            templatePrettyYaml(filehandle, indent_level+1, content_text)
+
+    filehandle.close()
+
+def templatePrettyYaml(filehandle, indent_level, content_text):
+    newline = '\n'
+    indent = ' '
+
+    if filehandle.closed :
+        raise OSError("file is already closed.")
+    
+    filehandle.write( newline + indent * indent_level + content_text)
 
     
 

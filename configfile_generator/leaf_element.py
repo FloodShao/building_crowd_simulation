@@ -5,7 +5,8 @@ class LeafElement:
     def __init__(self, name) :
         self._name = name
         self._attrib = {}
-
+        self._text = None
+        
     def addAttrib(self, key, value) :
         self._attrib[str(key)] = str(value)
 

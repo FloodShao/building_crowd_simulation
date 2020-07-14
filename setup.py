@@ -27,6 +27,8 @@ setup(
         'console_scripts': [
             'navmesh_generator = '
             'navmesh_generator.navmesh_generator:main',
+            'configfile_generator = '
+            'configfile_generator.configfile_generator:main',
         ],
     },
 )

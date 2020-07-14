@@ -8,6 +8,7 @@ from parsing_map.vertex import Vertex
 from parsing_map.edge import Edge
 from parsing_map.transform import Transform
 from configfile_generator.template_conf_yaml import *
+from configfile_generator.util import *
 
 class NavmeshGenerator:
     '''Generate navmesh for one level based on 'human_lanes' '''
@@ -203,7 +204,7 @@ def main():
     yaml_parse = BuildingYamlParse(map_path)
 
     # template configure file for menge
-    conf_template_file = open(output_folder_path + '/' + 'template_conf_menge.yaml', "w+")
+    conf_template_file = output_folder_path + '/' + 'template_conf_menge.yaml'
 
     for level_name in yaml_parse._level_keys :
         output_file = output_folder_path + '/' + level_name + "_navmesh.nav"
@@ -216,27 +217,29 @@ def main():
         navmesh_generator.Generate()
         navmesh_generator.Output(output_file)
 
+        # generate template config file
         level_config = {}
-
+        # behavior file related
         level_vertices = navmesh_generator.get_transformed_vertices()
         goal_area = set()
-        level_config['Goals'] = []
+        level_config['goals'] = []
         
         for v in level_vertices :
             if len( v.getName() ) == 0 :
                 continue    
             goal_area.add(v.getName())
-            level_config['Goals'].append(v)
+            level_config['goals'].append(v)
         
         level_config['state'] = [StateYAML().getAttributes()]
         level_config['transition'] = [TransitionYAML().getAttributes()]
         level_config['goal_set'] = [GoalSetYAML().getAttributes()]
         level_config['goal_area'] = list(goal_area)
+
+        # scene file related
         
-        yaml.dump({level_name: level_config}, conf_template_file)
-    
-    # close the conf_template_file
-    conf_template_file.close()
+
+        # generate template config file
+        templateYamlFile(level_name, level_config, conf_template_file)
 
 if __name__ == "__main__":
     sys.exit(main())
