@@ -23,6 +23,7 @@ class StateYAML:
             
             if key == "goal_set" :
                 self._attributes['goal_set'] = yaml_node[key]
+                print('in here', yaml_node[key])
                 B_goal_selector.setGoalSetId(yaml_node[key])
 
             if key == "navmesh_file_name" :

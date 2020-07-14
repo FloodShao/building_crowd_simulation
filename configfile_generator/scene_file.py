@@ -1,6 +1,6 @@
 import xml.etree.ElementTree as ET
 
-from leaf_element import LeafElement, Element
+from .leaf_element import LeafElement, Element
 
 class SceneFile (Element):
     

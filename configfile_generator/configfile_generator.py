@@ -50,6 +50,9 @@ def generate_behavior_file(yaml_node, output_dir):
 
     writeXmlFile(behavior_file.outputXmlElement(), output_dir = output_dir, file_name = 'behavior_file.xml')
 
+def generate_scene_file(yaml_node, output_dir):
+    
+
 def main():
     if len(sys.argv) > 2 :
         config_yaml_path = sys.argv[1]

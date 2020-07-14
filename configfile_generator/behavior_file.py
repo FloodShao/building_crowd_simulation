@@ -1,175 +1,147 @@
 import xml.etree.ElementTree as ET
 
-from .leaf_element import LeafElement
+from .leaf_element import LeafElement, Element
 
-class BehaviorState :
-
+class BehaviorFile (Element):
+    
     def __init__(self) :
-        self._name = None
-        self._final = False
-        self._goalSelector = None
-        self._velComponent = None
+        Element.__init__(self, 'BFSM')
+
+    def addState(self, state) :
+        if not hasattr(state, "outputXmlElement"):
+            raise ValueError("state provided is not an Element")
+        self.addSubElement(state)
+
+    def addTransition(self, transition) :
+        if not hasattr(transition, "outputXmlElement"):
+            raise ValueError("transition provided is not an Element")
+        self.addSubElement(transition)
+
+    def addGoalSet(self, goal_set) :
+        if not hasattr(goal_set, "outputXmlElement"):
+            raise ValueError("transition provided is not an Element")
+        self.addSubElement(goal_set)
+
+
+class BehaviorState (Element):
+    def __init__(self) :
+        Element.__init__(self, 'State')
+        self.addAttribute('name', '')
+        self.addAttribute('final', 0)
+        self._goalSelector = GoalSelector()
+        self._velComponent = VelComponent()
 
     def setStateName(self, name) :
         if len(name) != 0 :
-            self._name = str(name)
+            self.addAttribute('name', name)
         else :
             raise ValueError("invalid name provided for state name")
 
     def getStateName(self) :
-        return self._name
+        # from LeafElement
+        return self._attrib['name']
 
     def setGoalSelector(self, goal_selector) :
-        if  goal_selector.getGoalSetId() != None :
-            self._goalSelector = goal_selector
-        else :
-            raise ValueError("goal_selector provided does not configure a goal set!")
+        if not hasattr(goal_selector, "outputXmlElement"):
+            raise ValueError("goal_selector provided is not an element!")
+        self._goalSelector = goal_selector
+        self.addSubElement(self._goalSelector)
 
     def setVelComponent(self, vel_component) :
-        if vel_component.getNavMeshFile() != None :
-            self._velComponent = vel_component
-        else :
-            raise ValueError("vel_component provided does not configure a navmesh file!")
-    
+        if not hasattr(vel_component, "outputXmlElement"):
+            raise ValueError("vel_component provided is not an element!")
+        self._velComponent = vel_component
+        self.addSubElement(self._velComponent)
+            
     def setFinalState(self) : 
-        self._final = True
+        self.addAttribute('finale', 1)
     
     def setUnFinalState(self) :
-        self._final = False
+        self.addAttribute('finale', 0)
     
-    def outputXmlElement(self) :
-        if(not self._name or not self._goalSelector or not self._velComponent) :
-            raise ValueError("Incomplete element for State.")
-        
-        root = ET.Element('State')
-        
-        # attribute
-        if self._final : 
-            root.set('final', '1')
-        else :
-            root.set('final', '0')
-        root.set('name', self._name)
 
-        goal_selector_xml = LeafElement('GoalSelector')
-        goal_selector_xml.setAttributes(self._goalSelector.getAttributes())
-        root.append(goal_selector_xml.outputXmlElement())
-
-        vel_component_xml = LeafElement('VelComponent')
-        vel_component_xml.setAttributes(self._velComponent.getAttributes())
-        root.append(vel_component_xml.outputXmlElement())
-        
-        return root
-
-class GoalSelector :
+class GoalSelector (LeafElement):
 
     def __init__(self) : 
-        self._attributes = {}
-        self._attributes['dist'] = 'u'
-        self._attributes['type'] = 'weighted'
-        self._attributes['goal_set'] = None
+        LeafElement.__init__(self, 'GoalSelector')
+        self.addAttribute('dist', 'u')
+        self.addAttribute('type', 'weighted')
+        self.addAttribute('goal_set', -1) # not set
     
     def setGoalSetId(self, goal_set_id) :
-        self._attributes['goal_set'] = str(goal_set_id)
-
-    def getGoalSetId(self) :
-        return self._attributes['goal_set']
-
-    def getAttributes(self):
-        return self._attributes
+        self.addAttribute('goal_set', goal_set_id)
 
 
-class VelComponent : 
+class VelComponent (LeafElement): 
 
     def __init__(self) : 
-        self._attributes = {}
-        self._attributes['type'] = 'nav_mesh'
-        self._attributes['heading_threshold'] = str(15)
-        self._attributes['file_name'] = None
+        LeafElement.__init__(self, 'VelComponent')
+        self.addAttribute('type', 'nav_mesh')
+        self.addAttribute('heading_threshold', 15)
+        self.addAttribute('file_name', '') # not set
 
     def setNavMeshFile(self, file_name) : 
-        self._attributes['file_name'] = file_name
-
-    def getNavMeshFile(self) :
-        return self._attributes['file_name']
-    
-    def getAttributes(self) :
-        return self._attributes
+        self.addAttribute('file_name', file_name)
 
 
-class StateTransition :
-    def __init__(self) : 
-        self._fromStateName = None
-        self._toStateName = None
-        self._condition = None
+class StateTransition (Element):
+
+    def __init__(self) :
+        Element.__init__(self, 'Transition')
+        self.addAttribute('from', '')
+        self.addAttribute('to', '')
+        self._condition = TransitionCondition() 
     
     def setFromState(self, state) :
         if state.getStateName() != None :
-            self._fromStateName = state.getStateName()
+            self.addAttribute('from', state.getStateName())
         else :
             raise ValueError("The transition FromState provided is not a xml element")
 
     def setFromStateName(self, state_name) :
         if len( state_name ) > 0 :
-            self._fromStateName = state_name
+            self.addAttribute('from', state_name)
         else :
             raise ValueError("Invalid state name for state transition")
 
     def setToState(self, state):
         if state.getStateName() != None :
-            self._toStateName = state.getStateName()
+            self.addAttribute('to', state.getStateName())
         else :
             raise ValueError("The transition ToState provided is not a xml element")
     
     def setToStateName(self, state_name) :
         if len( state_name ) > 0 :
-            self._toStateName = state_name
+            self.addAttribute('to', state_name)
         else :
             raise ValueError("Invalid state name for state transition")
 
     def setCondition(self, condition) :
-        if condition.getConditionDistance() != None :
-            self._condition = condition
-        else :
+        if not hasattr(condition, "outputXmlElement") :
             raise ValueError("Invalid transition condition provided!")
-
-    def outputXmlElement(self) :
-        if not self._fromStateName or not self._toStateName or not self._condition :
-            raise ValueError("Incomplete element for transition.")
-        
-        root = ET.Element('Transition')
-        root.set('from', self._fromStateName)
-        root.set('to', self._toStateName)
-
-        condition_xml = LeafElement('Condition')
-        condition_xml.setAttributes(self._condition.getAttributes())
-        root.append(condition_xml.outputXmlElement())
-        return root
+        self._condition = condition
+        self.addSubElement(self._condition)
 
 
-class TransitionCondition:
+class TransitionCondition (LeafElement):
 
     def __init__(self) :
-        self._attributes = {}
-        self._attributes['distance'] = None
-        self._attributes['type'] = 'goal_reached'
+        LeafElement.__init__(self, 'Condition')
+        self.addAttribute('distance', 0.0)
+        self.addAttribute('type', 'goal_reached')
     
     def setConditionDistance(self, dist) :
         if(float(dist) > 0) :
-            self._attributes['distance'] = str(dist)
+            self.addAttribute('distance', dist)
         else :
             raise ValueError('invalid condition distance provided for TransitionCondition')
 
-    def getConditionDistance(self) :
-        return self._attributes['distance']
 
-    def getAttributes(self):
-        return self._attributes
-
-
-class GoalSet : 
+class GoalSet (Element): 
 
     def __init__(self) :
-        self._id = None
+        Element.__init__(self, 'GoalSet')
+        self.addAttribute('id', -1)
         self._goalList = []
         self._goal_area = set()
         self._capacity = 1
@@ -186,85 +158,29 @@ class GoalSet :
     def addGoal(self, goal) :
         goal.setId( len(self._goalList) )
         self._goalList.append(goal)
-
-    def outputXmlElement(self) :
-        root = ET.Element('GoalSet', {'id' : self._id})
-
-        for goal in self._goalList :
-            goal_attributes = goal.getAttributes()
-            goal_element = LeafElement('Goal')
-            goal_element.setAttributes(goal_attributes)
-            root.append(goal_element.outputXmlElement())
-        return root
+        self.addSubElement(goal)
 
     
-class Goal :
-    
+class Goal (LeafElement):
     def __init__(self, id = -1) :
         # default id = -1, need to initialize
-        self._id = id
-        self._type = 'point'
-        self._x = 0.0
-        self._y = 0.0
-        self._capacity = 1
-        self._weight = 1.0
+        LeafElement.__init__(self, 'Goal')
+        self.addAttribute('id', -1)
+        self.addAttribute('type', 'point')
+        self.addAttribute('x', 0.0)
+        self.addAttribute('y', 0.0)
+        self.addAttribute('weight', 1.0)
+        self.addAttribute('capacity', 1)
 
     def setCoord(self, x, y) :
-        self._x = float(x)
-        self._y = float(y)
+        self.addAttribute('x', float(x))
+        self.addAttribute('y', float(y))
 
     def setWeight(self, weight) :
-        self._weight = float(weight)
+        self.addAttribute('weight', float(weight))
 
     def setId(self, id) :
-        self._id = int(id)
+        self.addAttribute('id', int(id))
 
     def setCapacity(self, capacity) : 
-        self._capacity = int(capacity)
-
-    def getAttributes(self):
-        if self._id < 0 : 
-            raise ValueError("The Goal id is ", self._id, ". Please initialize the goal first!")
-        
-        result = {}
-        result['id'] = str(self._id)
-        result['capacity'] = str(self._capacity)
-        result['type'] = str(self._type)
-        result['weight'] = str(self._weight)
-        result['x'] = str(self._x)
-        result['y'] = str(self._y)
-
-        return result
-
-
-class BehaviorFile :
-    
-    def __init__(self) :
-        self._states = []
-        self._transitions = []
-        self._goalSets = []
-
-    def addState(self, State) :
-        self._states.append(State)
-
-    def addTransition(self, Transition) :
-        self._transitions.append(Transition)
-
-    def addGoalSet(self, GoalSet) :
-        self._goalSets.append(GoalSet)
-
-    def outputXmlElement(self):
-        root = ET.Element('BFSM')
-
-        for state in self._states :
-            root.append(state.outputXmlElement())
-
-        for transition in self._transitions :
-            root.append(transition.outputXmlElement())
-
-        for goalset in self._goalSets :
-            root.append(goalset.outputXmlElement())
-        
-        return root
-
-        
+        self.addAttribute('capacity', capacity)

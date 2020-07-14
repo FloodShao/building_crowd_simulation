@@ -13,7 +13,7 @@
 	<Transition from="injuredwalking" to="injuredwalking">
 		<Condition distance="0.2" type="goal_reached" />
 	</Transition>
-	<GoalSet id="1">
+	<GoalSet id="-1">
 		<Goal capacity="1" id="0" type="point" weight="1.0" x="9.975214343591647" y="-3.5730399029939375" />
 		<Goal capacity="1" id="1" type="point" weight="1.0" x="13.105331087295925" y="-3.6740078608091125" />
 		<Goal capacity="1" id="2" type="point" weight="1.0" x="15.932518561069944" y="-3.7345954078941466" />
@@ -39,7 +39,7 @@
 		<Goal capacity="1" id="22" type="point" weight="1.0" x="9.066477326770338" y="-2.6844930915376977" />
 		<Goal capacity="1" id="23" type="point" weight="1.0" x="6.038081969928401" y="-3.634964998275065" />
 	</GoalSet>
-	<GoalSet id="2">
+	<GoalSet id="-1">
 		<Goal capacity="2" id="0" type="point" weight="1.0" x="19.891339532697682" y="-3.2916637831095756" />
 		<Goal capacity="2" id="1" type="point" weight="1.0" x="22.698336801106628" y="-5.6341932076778765" />
 		<Goal capacity="2" id="2" type="point" weight="1.0" x="23.22339219203231" y="-3.1301082782093665" />
