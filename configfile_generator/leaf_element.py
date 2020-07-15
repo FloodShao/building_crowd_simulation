@@ -31,7 +31,7 @@ class Element (LeafElement):
 
     def addSubElement(self, element) :
         if not hasattr(element, "outputXmlElement"):
-            raise ValueError(self._name + "does not have method 'outputXmlElement' ")
+            raise ValueError(element + " does not have method 'outputXmlElement' ")
         
         self._subElements.append(element)
     

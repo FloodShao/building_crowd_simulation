@@ -165,6 +165,14 @@ class PolygonFactory:
         assert(polygon.getIntersectVertexId() == -1)
         lane = self.laneManager.getLane(polygon.getLaneId())
 
+        
+        # if list(lane.getLaneVertices())[0] == lane_vertex_id :
+        #     v0 = self.laneVertexManager.getLaneVertex(list(lane.getLaneVertices())[1])
+        #     v1 = self.laneVertexManager.getLaneVertex(list(lane.getLaneVertices())[0])
+        # else :
+        #     v0 = self.laneVertexManager.getLaneVertex(list(lane.getLaneVertices())[0])
+        #     v1 = self.laneVertexManager.getLaneVertex(list(lane.getLaneVertices())[1])
+
         v0 = self.laneVertexManager.getLaneVertex(list(lane.getLaneVertices())[0])
         v1 = self.laneVertexManager.getLaneVertex(list(lane.getLaneVertices())[1])
         

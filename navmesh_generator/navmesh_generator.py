@@ -236,8 +236,13 @@ def main():
         level_config['goal_area'] = list(goal_area)
 
         # scene file related
-        
 
+        level_config['obstacle_set'] = [ObstacleSetYAML().getAttributes()]
+        level_config['agent_profile'] = [AgentProfileYAML().getAttributes()]
+        level_config['agent_group'] = [AgentGroupYAML().getAttributes()]
+        level_config['agent_list'] = []
+        level_config['agent_list'].append( PointYAML(0.0, 0.0) )
+        
         # generate template config file
         templateYamlFile(level_name, level_config, conf_template_file)
 

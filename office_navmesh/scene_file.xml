@@ -1,0 +1,37 @@
+<Experiment version="2.0">
+	<SpatialQuery test_visibility="false" type="kd-tree" />
+	<Common time_step="0.1" />
+	<ObstacleSet class="1" file_name="L1_navmesh.nav" type="nav_mesh" />
+	<AgentProfile name="external_agent">
+		<Common class="1" max_accel="0" max_angle_vel="0" max_neighbors="10" max_speed="0" neighbor_dist="5" obstacleSet="1" obstacle_set="1" pref_speed="0" r="0.2" />
+		<ORCA ORCA_tau="1.0" ORCA_tauObst="0.4" tau="3.0" tauObst="0.15" />
+	</AgentProfile>
+	<AgentProfile name="human">
+		<Common class="1" max_accel="5" max_angle_vel="360" max_neighbors="10" max_speed="2" neighbor_dist="5" obstacleSet="1" obstacle_set="1" pref_speed="1" r="0.2" />
+		<ORCA ORCA_tau="1.0" ORCA_tauObst="0.4" tau="3.0" tauObst="0.15" />
+	</AgentProfile>
+	<AgentGroup>
+		<ProfileSelector name="external_agent" type="const" />
+		<StateSelector name="static" type="const" />
+		<Generator>
+			<Agent p_x="0.0" p_y="0.0" />
+			<Agent p_x="1.0" p_y="0.0" />
+			<Agent p_x="2.0" p_y="0.0" />
+			<Agent p_x="3.0" p_y="0.0" />
+			<Agent p_x="4.0" p_y="0.0" />
+			<Agent p_x="5.0" p_y="0.0" />
+		</Generator>
+	</AgentGroup>
+	<AgentGroup>
+		<ProfileSelector name="human" type="const" />
+		<StateSelector name="walking" type="const" />
+		<Generator>
+			<Agent p_x="0.0" p_y="0.0" />
+			<Agent p_x="1.0" p_y="0.0" />
+			<Agent p_x="2.0" p_y="0.0" />
+			<Agent p_x="3.0" p_y="0.0" />
+			<Agent p_x="4.0" p_y="0.0" />
+			<Agent p_x="5.0" p_y="0.0" />
+		</Generator>
+	</AgentGroup>
+</Experiment>

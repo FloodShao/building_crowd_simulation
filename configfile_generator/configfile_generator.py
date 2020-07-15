@@ -4,6 +4,7 @@ import yaml
 
 from .template_conf_yaml import *
 from .behavior_file import *
+from .scene_file import *
 from .util import *
 
 class BuildConfigYaml:
@@ -51,7 +52,39 @@ def generate_behavior_file(yaml_node, output_dir):
     writeXmlFile(behavior_file.outputXmlElement(), output_dir = output_dir, file_name = 'behavior_file.xml')
 
 def generate_scene_file(yaml_node, output_dir):
-    
+    scene_file = SceneFile()
+
+    # add default configuration
+    scene_file.addSpatialQuery()
+    scene_file.addCommon()
+
+    # load all the agent list first
+    if not 'agent_list' in yaml_node :
+        raise ValueError("No agent_list provided!")
+
+    agent_list = AgentsListYAML()
+    agent_list.load(yaml_node['agent_list'])
+
+    for key in yaml_node:
+        if key == 'obstacle_set' :
+            for item in yaml_node[key] :
+                tmp = ObstacleSetYAML().load(item)
+                scene_file.addSubElement(tmp)
+
+        if key == 'agent_profile' :
+            for item in yaml_node[key]:
+                tmp = AgentProfileYAML().load(item)
+                scene_file.addSubElement(tmp)
+
+        if key == 'agent_group' :
+            for item in yaml_node[key]:
+                tmp_yaml = AgentGroupYAML()
+                tmp_yaml.load(item)
+                tmp = tmp_yaml.loadAgents(agent_list)
+                scene_file.addSubElement(tmp)
+
+    writeXmlFile(scene_file.outputXmlElement(), output_dir = output_dir, file_name = 'scene_file.xml')
+
 
 def main():
     if len(sys.argv) > 2 :
@@ -73,8 +106,7 @@ def main():
     yaml_node = yaml_parse.getRawData()
 
     generate_behavior_file(yaml_node, output_dir)
-
-
+    generate_scene_file(yaml_node, output_dir)
 
 if __name__ == '__main__':
     sys.exit(main())

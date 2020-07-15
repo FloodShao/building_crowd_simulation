@@ -16,6 +16,12 @@ class SceneFile (Element):
         self._common = Common()
         self.addSubElement(self._common)
 
+    def addObstacleSet(self, file_name, class_id):
+        self._obstacleSet = ObstacleSet()
+        self._obstacleSet.setNavMeshFile(file_name)
+        self._obstacleSet.setClass(class_id)
+        self.addSubElement(self._obstacleSet)
+
     def addAgentProfile(self, profile_name) :
         tmp = AgentProfile(profile_name)
         self.addSubElement(tmp)
@@ -42,6 +48,8 @@ class ObstacleSet (LeafElement):
     def __init__(self):
         LeafElement.__init__(self, 'ObstacleSet')
         self.addAttribute('type', 'nav_mesh')
+        self.addAttribute('file_name', '')
+        self.addAttribute('class', -1)
 
     def setNavMeshFile(self, file_name):
         self.addAttribute('file_name', file_name)
@@ -58,7 +66,7 @@ class ProfileCommon (LeafElement) :
         self.addAttribute('max_neighbors', 10)
         self.addAttribute('max_speed', 2)
         self.addAttribute('neighbor_dist', 5)
-        self.addAttribute('obstacle_set', 1)
+        self.addAttribute('obstacleSet', None)
         self.addAttribute('pref_speed', 0)
         self.addAttribute('r', 0.2)
 
@@ -107,6 +115,7 @@ class Agent (LeafElement) :
 class AgentGenerator (Element) :
     def __init__(self):
         Element.__init__(self, 'Generator')
+        self.addAttribute('type', 'explicit')
     
     def addAgent(self, x, y):
         self.addSubElement(Agent(x, y))
@@ -126,7 +135,7 @@ class AgentProfile (Element):
 
     def setProfileORCA(self, key, value):
         self._profileORCA.addAttribute(key, value)
-
+        
 
 class AgentGroup (Element):
 

@@ -54,10 +54,10 @@ class BehaviorState (Element):
         self.addSubElement(self._velComponent)
             
     def setFinalState(self) : 
-        self.addAttribute('finale', 1)
+        self.addAttribute('final', 1)
     
     def setUnFinalState(self) :
-        self.addAttribute('finale', 0)
+        self.addAttribute('final', 0)
     
 
 class GoalSelector (LeafElement):
@@ -147,7 +147,7 @@ class GoalSet (Element):
         self._capacity = 1
 
     def setId(self, id) :
-        self._id = str(id)
+        self.addAttribute('id', str(id))
     
     def addGoalArea(self, area) :
         self._goal_area.add(area)

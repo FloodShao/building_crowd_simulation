@@ -33,34 +33,38 @@ L1:
   - [22.698336801106628, -5.6341932076778765, 0.0, conf1]
   - [23.22339219203231, -3.1301082782093665, 0.0, conf1]
  state:
-  - {name: 'static', goal_set: None, navmesh_file_name: None, final: 1}
-  - {name: 'walking', goal_set: 0, navmesh_file_name: 'L1_navmesh.nav', final: 0}
+  - {name: 'static', goal_set: 1, navmesh_file_name: 'L1_navmesh.nav'}
+  - {name: 'walking', goal_set: 1, navmesh_file_name: 'L1_navmesh.nav'}
+  - {name: 'injuredwalking', goal_set: 2, navmesh_file_name: 'L1_navmesh.nav'}
  transition:
   - {from: 'walking', to: 'walking', condition_dist: 0.2}
+  - {from: 'injuredwalking', to: 'injuredwalking', condition_dist: 0.2}
  goal_set:
-  - {set_id: 0, set_area: {common, conf1}, capacity: 1}
-  - {set_id: 1, set_area: {conf1, conf2}, capacity: 1}
+  - {set_id: 1, set_area: {common, store}, capacity: 1}
+  - {set_id: 2, set_area: {conf1, conf2}, capacity: 2}
  goal_area:
+  - common
+  - store
   - conf2
   - conf1
-  - store
-  - common
  obstacle_set:
   - {class: 1, file_name: 'L1_navmesh.nav', type: nav_mesh}
  agent_profile:
   - {name: 'external_agent', class: 1, max_accel: 0, max_angle_vel: 0, max_neighbors: 10, max_speed: 0, neighbor_dist: 5, obstacleSet: 1, pref_speed: 0, r: 0.2, ORCA_tau: 1.0, ORCA_tauObst: 0.4}
-  - {name: 'human', class: 1, max_accel: 5, max_angle_vel: 360, max_neighbors: 10, max_speed: 3, neighbor_dist: 5, obstacleSet: 1, pref_speed: 1, r: 0.2, ORCA_tau: 1.0, ORCA_tauObst: 0.4}
+  - {name: 'human', class: 1, max_accel: 5, max_angle_vel: 360, max_neighbors: 10, max_speed: 2, neighbor_dist: 5, obstacleSet: 1, pref_speed: 1, r: 0.2, ORCA_tau: 1.0, ORCA_tauObst: 0.4}
  agent_group:
-  - {GroupId: 0, profile_selector: external_agent, state_selector: static}
-  - {GroupId: 1, profile_selector: human, state_selector: walking}
+  - {GroupId: 0, profile_selector: 'external_agent', state_selector: 'static'}
+  - {GroupId: 1, profile_selector: 'human', state_selector: 'walking'}
  agent_list:
   - [0.0, 0.0, 0]
   - [1.0, 0.0, 0]
   - [2.0, 0.0, 0]
-  - [13.11, -3.67, 1]
-  - [13.11, -3.67, 1]
-  - [13.11, -3.67, 1]
-  - [13.11, -3.67, 1]
-  - [13.11, -3.67, 1]
-  - [13.11, -3.67, 1]
-  - [13.11, -3.67, 1]
+  - [3.0, 0.0, 0]
+  - [4.0, 0.0, 0]
+  - [5.0, 0.0, 0]
+  - [0.0, 0.0, 1]
+  - [1.0, 0.0, 1]
+  - [2.0, 0.0, 1]
+  - [3.0, 0.0, 1]
+  - [4.0, 0.0, 1]
+  - [5.0, 0.0, 1]
