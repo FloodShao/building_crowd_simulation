@@ -40,7 +40,7 @@
 	<GoalSet id="1">
 		<Goal capacity="1" id="0" type="point" weight="1.0" x="6.925883817832386" y="-2.058469742796842" />
 		<Goal capacity="1" id="1" type="point" weight="1.0" x="9.066477326770338" y="-2.6844930915376977" />
-		<Goal capacity="1" id="2" type="point" weight="1.0" x="6.1092175236737605" y="-3.50961641511339" />
+		<Goal capacity="1" id="2" type="point" weight="1.0" x="6.038081969928401" y="-3.634964998275065" />
 		<Goal capacity="1" id="3" type="point" weight="1.0" x="19.891339532697682" y="-3.2916637831095756" />
 		<Goal capacity="1" id="4" type="point" weight="1.0" x="22.698336801106628" y="-5.6341932076778765" />
 		<Goal capacity="1" id="5" type="point" weight="1.0" x="23.22339219203231" y="-3.1301082782093665" />
