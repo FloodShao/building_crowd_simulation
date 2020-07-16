@@ -8,7 +8,8 @@ setup(
     packages=[
         'building_navmesh',
         'parsing_map',
-        'navmesh_generator'
+        'navmesh_generator',
+        'configfile_generator'
     ],
     data_files=[
         ('share/ament_index/resource_index/packages',
@@ -26,6 +27,8 @@ setup(
         'console_scripts': [
             'navmesh_generator = '
             'navmesh_generator.navmesh_generator:main',
+            'configfile_generator = '
+            'configfile_generator.configfile_generator:main',
         ],
     },
 )

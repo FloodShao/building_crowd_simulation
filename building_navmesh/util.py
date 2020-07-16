@@ -164,12 +164,17 @@ class PolygonFactory:
         # must be a lane node
         assert(polygon.getIntersectVertexId() == -1)
         lane = self.laneManager.getLane(polygon.getLaneId())
-
-        v0 = self.laneVertexManager.getLaneVertex(list(lane.getLaneVertices())[0])
-        v1 = self.laneVertexManager.getLaneVertex(list(lane.getLaneVertices())[1])
+        
+        if list(lane.getLaneVertices())[0] == lane_vertex_id :
+            v0 = self.laneVertexManager.getLaneVertex(list(lane.getLaneVertices())[1])
+            v1 = self.laneVertexManager.getLaneVertex(list(lane.getLaneVertices())[0])
+        else :
+            v0 = self.laneVertexManager.getLaneVertex(list(lane.getLaneVertices())[0])
+            v1 = self.laneVertexManager.getLaneVertex(list(lane.getLaneVertices())[1])
         
         lane_vector = Vector2d([0.0, 0.0])
         lane_vector.initWith2P(v0, v1)
+        lane_vector_unit = lane_vector.getUnit()
         lane_normal_unit0 = lane_vector.getNormalUnit()
         lane_normal_unit1 = Vector2d([-lane_normal_unit0.x, -lane_normal_unit0.y])
 
@@ -177,12 +182,11 @@ class PolygonFactory:
         lane_width = lane.getWidth()
 
         new_vertex0 = Vertex(
-            [orign_point.x + 0.5 * lane_width * lane_normal_unit0.x, 
-             orign_point.y + 0.5 * lane_width * lane_normal_unit0.y])
+            [orign_point.x + 0.5 * lane_width * (lane_normal_unit0.x + lane_vector_unit.x), 
+             orign_point.y + 0.5 * lane_width * (lane_normal_unit0.y + lane_vector_unit.y) ])
         new_vertex1 = Vertex(
-            [orign_point.x + 0.5 * lane_width * lane_normal_unit1.x,
-             orign_point.y + 0.5 * lane_width * lane_normal_unit1.y]
-        )
+            [orign_point.x + 0.5 * lane_width * (lane_normal_unit1.x + lane_vector_unit.x),
+             orign_point.y + 0.5 * lane_width * (lane_normal_unit1.y + lane_vector_unit.y) ])
 
         return [new_vertex0, new_vertex1]
 
