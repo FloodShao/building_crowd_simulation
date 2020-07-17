@@ -193,9 +193,8 @@ def main():
     if len(sys.argv) > 2:
         output_folder_path = sys.argv[2]
         if not os.path.exists(output_folder_path) :
-            print("Invalid output folder path: ", output_folder_path)
-            sys.exit(1)
-            raise ValueError('output folder path not exist!')
+            print("Creating output folder path: ", output_folder_path)
+            os.mkdir(output_folder_path)
     else:
         output_folder_path = "navmesh_output/"
         if not os.path.exists(output_folder_path) :
