@@ -88,9 +88,12 @@ class StateTransition (Element):
 
     def __init__(self) :
         Element.__init__(self, 'Transition')
-        self.addAttribute('from', '')
-        self.addAttribute('to', '')
+        self.addAttribute('from', None)
+        self.addAttribute('to', None)
         self._condition = TransitionCondition() 
+        self._target = TransitionTarget()
+        self.addSubElement(self._condition)
+        self.addSubElement(self._target)
     
     def setFromState(self, state) :
         if state.getStateName() != None :
@@ -119,25 +122,125 @@ class StateTransition (Element):
         else :
             raise ValueError("Invalid state name for state transition")
 
-    def setCondition(self, condition) :
-        if not hasattr(condition, "outputXmlElement") :
-            raise ValueError("Invalid transition condition provided!")
-        self._condition = condition
-        self.addSubElement(self._condition)
+    def parseCondition(self, condition_params) :
+        # recommended method to set a condition for transition
+        self._condition.parseCondition(condition_params)
+
+    def parseTarget(self, target_params) :
+        self._target.parseTarget(target_params)
 
 
-class TransitionCondition (LeafElement):
+class TransitionCondition (Element):
 
     def __init__(self) :
-        LeafElement.__init__(self, 'Condition')
-        self.addAttribute('distance', 0.0)
-        self.addAttribute('type', 'goal_reached')
+        Element.__init__(self, 'Condition')
+        self.addAttribute('type', 'auto')
     
-    def setConditionDistance(self, dist) :
+    def setType(self, condition_type):
+        self.addAttribute('type', condition_type)
+
+    def parseCondition(self, params) :
+        # params in dictionary formate
+        if 'type' in params :
+            self.setType( params['type'] )
+        else:
+            print("No condition type configure! 'auto' type will be configured instead!")
+            return
+        
+        # leaf condition for goal_reached, only 'distance' provided
+        if params['type'] == 'goal_reached' :
+            if not 'distance' in params:
+                raise ValueError("missing 'distance' for 'goal_reached' type condition")
+            self.setGoalReachDistance(params['distance'])
+            return
+        
+        # leaf condition for timer
+        if params['type'] == 'timer' :
+            if not 'per_agent' in params :
+                raise ValueError("missing 'per_agent' [bool] for 'timer' type condition.")
+            
+            self.addAttribute('per_agent', params['per_agent'])
+            
+            if not 'dist' in params:
+                raise ValueError("missing 'dist' ['u' for uniform and 'c' for const distribution] for 'timer' type condition.")
+            
+            self.addAttribute('dist', params['dist'])
+            if params['dist'] == 'u' :
+                if not 'min' in params:
+                    raise ValueError("missing 'min' for 'dist'='u'")
+                if not 'max' in params:
+                    raise ValueError("missing 'max' for 'dist'='u'")
+                if not float(params['min']) > 0 or not float(params['max']) > 0 or not float(params['max']) >= float(params['min']) :
+                    raise ValueError("invalid 'min' and 'max' value for 'timer' condition")
+                else :
+                    self.addAttribute('min', params['min'])
+                    self.addAttribute('max', params['max'])
+            elif params['dist'] == 'c' :
+                if not 'value' in params :
+                    raise ValueError("missing 'value' for 'dist'='c'")
+                if not float(params['value']) > 0 :
+                    raise ValueError("invalid 'value' for 'timer' condition")
+                self.addAttribute('value', params['value'])
+            else :
+                raise ValueError("'dist' must be configured as 'u' or 'c'")
+            return
+        
+        if params['type'] == 'not':
+            if not 'condition1' in params :
+                raise ValueError("a subcondition 'condition1' must be included.")
+            sub_condition = TransitionCondition()
+            sub_condition.parseCondition( params['condition1'] )
+            self.addSubElement(sub_condition)
+        
+        if params['type'] == 'and' or params['type'] == 'or':
+            if not 'condition1' in params or not 'condition2' in params:
+                raise ValueError("two subconditions 'condition1' and 'condition2' must be included.")
+            condition1 = TransitionCondition()
+            condition1.parseCondition( params['condition1'] )
+            condition2 = TransitionCondition()
+            condition2.parseCondition( params['condition2'] )
+            self.addSubElement(condition1)
+            self.addSubElement(condition2)
+
+    
+    def setGoalReachDistance(self, dist) :
         if(float(dist) > 0) :
             self.addAttribute('distance', dist)
         else :
             raise ValueError('invalid condition distance provided for TransitionCondition')
+
+
+class TransitionTarget (Element) :
+    
+    def __init__(self) :
+        Element.__init__(self, 'Target')
+        self.addAttribute('type', 'prob')
+
+    def setType(self, target_type) :
+        # should not attempt to changeg the type of transition target
+        self.addAttribute('type', target_type)
+
+    def parseTarget(self, params):
+        # params in [{}, {}, {}] format
+        if not params:
+            return
+        
+        for state_item in params:
+            tmp = TargetState()
+            tmp.parseState(state_item)
+            self.addSubElement(tmp)
+
+
+class TargetState (LeafElement) :
+
+    def __init__(self):
+        LeafElement.__init__(self, 'State')
+        
+    def parseState(self, params):
+        if not 'weight' in params or not 'name' in params :
+            raise ValueError("'weight' and 'name' are required for Target State")
+        self.addAttribute('weight', params['weight'])
+        self.addAttribute('name', params['name'])
 
 
 class GoalSet (Element): 
