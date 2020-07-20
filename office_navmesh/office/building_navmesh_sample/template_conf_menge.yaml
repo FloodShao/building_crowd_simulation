@@ -33,38 +33,21 @@ L1:
   - [23.22339219203231, -3.1301082782093665, 0.0, conf1]
   - [6.1092175236737605, -3.50961641511339, 0.0, store]
  state:
-  - {name: 'static', goal_set: None, navmesh_file_name: None, final: 1}
-  - {name: 'common_walking', goal_set: 0, navmesh_file_name: 'L1_navmesh.nav', final: 0}
-  - {name: 'store_walking', goal_set: 1, navmesh_file_name: 'L1_navmesh.nav', final: 0}
-  - {name: 'conf_walking', goal_set: 2, navmesh_file_name: 'L1_navmesh.nav', final: 0}
+  - {name: , goal_set: , navmesh_file_name: , final: 0}
  transition:
-  - {from: 'common_walking', to: 'store_walking', condition_dist: 0.2}
-  - {from: 'store_walking', to: 'common_walking', condition_dist: 0.2}
+  - {from: , to: , condition_dist: 0.0}
  goal_set:
-  - {set_id: 0, set_area: {common}, capacity: 2}
-  - {set_id: 1, set_area: {store}, capacity: 1}
-  - {set_id: 2, set_area: {conf1, conf2}, capacity: 1}
+  - {set_id: , set_area: set(), capacity: 1}
  goal_area:
   - conf1
   - store
   - conf2
   - common
  obstacle_set:
-  - {class: 1, file_name: 'L1_navmesh.nav', type: nav_mesh}
+  - {class: obstacleSetId, file_name: None, type: nav_mesh}
  agent_profile:
-  - {name: 'external_agent', class: 1, max_accel: 0, max_angle_vel: 0, max_neighbors: 10, max_speed: 0, neighbor_dist: 5, obstacleSet: 1, pref_speed: 0, r: 0.25, ORCA_tau: 1.0, ORCA_tauObst: 0.4}
-  - {name: 'human', class: 1, max_accel: 5, max_angle_vel: 180, max_neighbors: 10, max_speed: 3, neighbor_dist: 10, obstacleSet: 1, pref_speed: 1, r: 0.25, ORCA_tau: 1.0, ORCA_tauObst: 0.4}
+  - {name: None, class: agentClassId, max_accel: 5, max_angle_vel: 360, max_neighbors: 10, max_speed: 0, neighbor_dist: 5, obstacleSet: obstacleSetId, pref_speed: 0, r: 0.2, ORCA_tau: 1.0, ORCA_tauObst: 0.4}
  agent_group:
-  - {GroupId: 0, profile_selector: external_agent, state_selector: static}
-  - {GroupId: 1, profile_selector: human, state_selector: common_walking}
+  - {GroupId: None, profile_selector: None, state_selector: None}
  agent_list:
-  - [0.0, 0.0, 0]
-  - [1.0, 0.0, 0]
-  - [2.0, 0.0, 0]
-  - [13.11, -3.67, 1]
-  - [13.11, -3.67, 1]
-  - [13.11, -3.67, 1]
-  - [13.11, -3.67, 1]
-  - [13.11, -3.67, 1]
-  - [13.11, -3.67, 1]
-  - [13.11, -3.67, 1]
+  - [0.0, 0.0, GroupId]

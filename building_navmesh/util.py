@@ -493,9 +493,7 @@ class FileWriter:
         self.polygonManager = polygonManager
 
     def generateNavMesh(self):
-        print("Generating: ", self.filename)
         # vertex part
-        print("Writing vertices...")
         self.writeLine(self.vertexManager.getSize())
         for i in range(self.vertexManager.getSize()):
             v = self.vertexManager.getVertex(i)
@@ -504,8 +502,6 @@ class FileWriter:
         self.writeLine(" ")
         
         # edge part
-        print("complete.")
-        print("Writing edges...")
         self.writeLine(self.edgeManager.getSize())
         for i in range(self.edgeManager.getSize()):
             e = self.edgeManager.getEdge(i)
@@ -513,8 +509,6 @@ class FileWriter:
         self.writeLine(" ")
 
         # obstacle part
-        print("complete.")
-        print("Writing obstalces...")
         self.writeLine(self.obstacleManager.getSize())
         for i in range(self.obstacleManager.getSize()):
             o = self.obstacleManager.getObstacle(i)
@@ -522,8 +516,6 @@ class FileWriter:
         self.writeLine(" ")
 
         # polygon part
-        print("complete.")
-        print("Writing node...")
         # nodes name
         self.filehandle.write("walkable")
         self.filehandle.write("\n")
@@ -557,3 +549,5 @@ class FileWriter:
                 self.writeLine(0)
             # blank
             self.writeLine(" ")
+
+        print("Generate: ", self.filename)

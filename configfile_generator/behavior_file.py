@@ -111,6 +111,9 @@ class StateTransition (Element):
             raise ValueError("The transition ToState provided is not a xml element")
     
     def setToStateName(self, state_name) :
+        # to state can be None, as there might be a Target
+        if not state_name:
+            return
         if len( state_name ) > 0 :
             self.addAttribute('to', state_name)
         else :
