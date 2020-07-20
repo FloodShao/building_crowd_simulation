@@ -95,7 +95,6 @@ class TransitionYAML (BasicYAML):
         if not self._attributes['to'] and not self._attributes['Target'] :
             raise ValueError("A transition must include either 'to' state or a set of 'Target' states.")
 
-
         return B_transition
 
 
