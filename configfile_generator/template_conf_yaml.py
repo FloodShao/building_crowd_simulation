@@ -1,7 +1,6 @@
 from .behavior_file import *
 from .scene_file import *
 
-
 class PointYAML :
     def __init__(self, x, y) :
         self._x = float(x)
@@ -28,115 +27,108 @@ class BasicYAML :
         for key in yaml_node :
             self._attributes[key] = yaml_node[key]
 
-class StateYAML:
+class StateYAML (BasicYAML):
 
     def __init__(self) :
-        self._attributes = {}
-        self._attributes['name'] = ''
-        self._attributes['goal_set'] = ''
-        self._attributes['navmesh_file_name'] = ''
+        BasicYAML.__init__(self)
+        self._attributes['name'] = None
+        self._attributes['goal_set'] = None
+        self._attributes['navmesh_file_name'] = None
         self._attributes['final'] = 0
 
     def load(self, yaml_node):
-        keys = yaml_node.keys()
+
+        BasicYAML.load(self, yaml_node)
 
         B_state = BehaviorState()
         B_goal_selector = GoalSelector()
         B_vel_component = VelComponent()
 
-        for key in keys :
-            if key == "name" :
-                self._attributes['name'] = yaml_node[key]
-                B_state.setStateName(yaml_node[key])
-            
-            if key == "goal_set" :
-                self._attributes['goal_set'] = yaml_node[key]
-                B_goal_selector.setGoalSetId(yaml_node[key])
-
-            if key == "navmesh_file_name" :
-                self._attributes['navmesh_file_name'] = yaml_node[key]
-                B_vel_component.setNavMeshFile(yaml_node[key])
-
-            if key == "final" :
-                self._attributes['final'] = yaml_node[key]
+        if self._attributes['name'] :
+            B_state.setStateName(self._attributes['name'])
         
-        if not self._attributes['final'] : 
+        if self._attributes['goal_set'] :
+            B_goal_selector.setGoalSetId(self._attributes['goal_set'])
+
+        if self._attributes['navmesh_file_name'] :
+            B_vel_component.setNavMeshFile(self._attributes['navmesh_file_name'])
+
+        if self._attributes['final'] :
+            B_state.setFinalState()
+        else :
             B_state.setUnFinalState()
             B_state.setGoalSelector(B_goal_selector)
             B_state.setVelComponent(B_vel_component)
-        else :
-            B_state.setFinalState()
 
         return B_state
 
-    def getAttributes(self):
-        return self._attributes
-
-class TransitionYAML:
+class TransitionYAML (BasicYAML):
 
     def __init__(self) :
-        self._attributes = {}
-        self._attributes['from'] = ''
-        self._attributes['to'] = ''
-        self._attributes['condition_dist'] = 0.0
-        # self._attributes['condition_type'] = 'goal_reached'
+        BasicYAML.__init__(self)
+        self._attributes['from'] = None
+        self._attributes['to'] = None
+        self._attributes['Condition'] = None
+        self._attributes['Target'] = None
 
     def load(self, yaml_node) :
-        keys = yaml_node.keys()
+        BasicYAML.load(self, yaml_node)
 
         B_transition = StateTransition()
-        B_transition_condition = TransitionCondition()
 
-        for key in keys :
-            if key == "from" :
-                self._attributes['from'] = yaml_node[key]
-                B_transition.setFromStateName(yaml_node[key])
-            if key == "to" :
-                self._attributes['to'] = yaml_node[key]
-                B_transition.setToStateName(yaml_node[key])
-            if key == "condition_dist" :
-                self._attributes['condition_dist'] = float(yaml_node[key])
-                B_transition_condition.setConditionDistance( float(yaml_node[key]) )
+        if self._attributes['from'] :
+            B_transition.setFromStateName(self._attributes['from'])
+        else :
+            raise ValueError("A 'from' state must be configured for a transition")
         
-        B_transition.setCondition(B_transition_condition)
+        if self._attributes['to'] :
+            B_transition.setToStateName(self._attributes['to'])
+
+        if self._attributes['Condition'] :
+            B_transition.parseCondition(self._attributes['Condition'])
+        else :
+            raise ValueError("A 'Condition' state must be configured for a transition")
+        
+        if self._attributes['Target'] :
+            B_transition.parseTarget(self._attributes['Target'])
+
+        if not self._attributes['to'] and not self._attributes['Target'] :
+            raise ValueError("A transition must include either 'to' state or a set of 'Target' states.")
+
 
         return B_transition
 
-    def getAttributes(self):
-        return self._attributes
 
-
-class GoalSetYAML :
+class GoalSetYAML (BasicYAML):
     
     def __init__(self) :
-        self._attributes = {}
-        self._attributes['set_id'] = ''
-        self._attributes['set_area'] = set()
-        self._attributes['capacity'] = 1
+        BasicYAML.__init__(self)
+        self._attributes['set_id'] = None
+        self._attributes['set_area'] = None
+        self._attributes['capacity'] = None
 
     def load(self, yaml_node) :
-        keys = yaml_node.keys()
-        
+        BasicYAML.load(self, yaml_node)
         B_goal_set = GoalSet()
 
-        for key in keys :
-            if key == "set_id" :
-                self._attributes['set_id'] = yaml_node[key]
-                B_goal_set.setId(yaml_node[key])
-            if key == "set_area" :
-                for area in yaml_node[key] :
-                    self._attributes['set_area'].add(area)
-                    B_goal_set.addGoalArea(area)
-            if key == "capacity" :
-                self._attributes['capacity'] = yaml_node[key]
-                B_goal_set.setCapacity(yaml_node[key])
+        if not self._attributes['set_id'] == None:
+            B_goal_set.setId( self._attributes['set_id'] )
+        else :
+            raise ValueError("missing 'set_id' for GoalSet")
+        
+        if self._attributes['set_area'] :
+            for area in self._attributes['set_area'] :
+                B_goal_set.addGoalArea(area)
+        else :
+            raise ValueError("missing 'set_area' for GoalSet")
+
+        if self._attributes['capacity'] :
+            B_goal_set.setCapacity( self._attributes['capacity'] )
+        else :
+            raise ValueError("missing 'capacity' for capacity")
 
         # haven't initialize each goal
         return B_goal_set
-
-    def getAttributes(self):
-        return self._attributes
-
 
 
 class GoalsYAML :
@@ -281,3 +273,11 @@ class ObstacleSetYAML (BasicYAML) :
         self._obstacle_set.setClassId(self._attributes['class'])
         return self._obstacle_set        
         
+
+if __name__ == '__main__' :
+    import yaml
+    f = open('test.yaml')
+    y = yaml.load(f, yaml.SafeLoader)
+    condition = TransitionYAML()
+    condition.load(y['test'][0])
+    print(condition.getAttributes())
