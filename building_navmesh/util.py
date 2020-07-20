@@ -550,4 +550,7 @@ class FileWriter:
             # blank
             self.writeLine(" ")
 
-        print("Generate: ", self.filename)
+        if self.filename[0] == '/' :
+            print("Generate: ", self.filename)
+        else :
+            print("Generate: ", os.getcwd() + '/' + self.filename)

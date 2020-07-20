@@ -22,18 +22,22 @@ class BasicYAML :
 
     def getAttributes(self):
         return self._attributes
+    
+    def setAttributes(self, key, value):
+        self._attributes[key] = value
 
     def load(self, yaml_node):
         for key in yaml_node :
             self._attributes[key] = yaml_node[key]
 
+
 class StateYAML (BasicYAML):
 
     def __init__(self) :
         BasicYAML.__init__(self)
-        self._attributes['name'] = None
-        self._attributes['goal_set'] = None
-        self._attributes['navmesh_file_name'] = None
+        self._attributes['name'] = ''
+        self._attributes['goal_set'] = ''
+        self._attributes['navmesh_file_name'] = ''
         self._attributes['final'] = 0
 
     def load(self, yaml_node):
@@ -66,10 +70,10 @@ class TransitionYAML (BasicYAML):
 
     def __init__(self) :
         BasicYAML.__init__(self)
-        self._attributes['from'] = None
-        self._attributes['to'] = None
-        self._attributes['Condition'] = None
-        self._attributes['Target'] = None
+        self._attributes['from'] = ''
+        self._attributes['to'] = ''
+        self._attributes['Condition'] = ''
+        self._attributes['Target'] = ''
 
     def load(self, yaml_node) :
         BasicYAML.load(self, yaml_node)
@@ -102,9 +106,9 @@ class GoalSetYAML (BasicYAML):
     
     def __init__(self) :
         BasicYAML.__init__(self)
-        self._attributes['set_id'] = None
-        self._attributes['set_area'] = None
-        self._attributes['capacity'] = None
+        self._attributes['set_id'] = ''
+        self._attributes['set_area'] = ''
+        self._attributes['capacity'] = ''
 
     def load(self, yaml_node) :
         BasicYAML.load(self, yaml_node)
@@ -151,7 +155,7 @@ class GoalsYAML :
 class AgentProfileYAML (BasicYAML):
     def __init__(self):
         BasicYAML.__init__(self)
-        self._attributes['name'] = None
+        self._attributes['name'] = ''
 
         self._attributes['class'] = 'agentClassId'
         self._attributes['max_accel'] = 5
@@ -201,15 +205,15 @@ class AgentProfileYAML (BasicYAML):
 class AgentGroupYAML (BasicYAML):
     def __init__(self):
         BasicYAML.__init__(self)
-        self._attributes['GroupId'] = None
-        self._attributes['profile_selector'] = None
-        self._attributes['state_selector'] = None
+        self._attributes['group_id'] = ''
+        self._attributes['profile_selector'] = ''
+        self._attributes['state_selector'] = ''
         self._agent_group = None
 
     def load(self, yaml_node):
         keys = yaml_node.keys()
 
-        if not 'GroupId' in keys or not 'profile_selector' in keys or not 'state_selector' in keys :
+        if not 'group_id' in keys or not 'profile_selector' in keys or not 'state_selector' in keys :
             raise ValueError("Invalid AgentGroup YAML provided.")
 
         BasicYAML.load(self, yaml_node)
@@ -218,7 +222,7 @@ class AgentGroupYAML (BasicYAML):
         return self._agent_group
 
     def loadAgents(self, agents_list_yaml) :
-        agents_list = agents_list_yaml.getAgentsGroup(self._attributes['GroupId'])
+        agents_list = agents_list_yaml.getAgentsGroup(self._attributes['group_id'])
         if not agents_list or not self._agent_group:
             print("No agents are loaded.")
             return 
@@ -230,17 +234,49 @@ class AgentGroupYAML (BasicYAML):
         return self._agent_group
 
 
-class AgentsListYAML:
+class AgentsListYAML (BasicYAML):
     # not needed in generating the template YAML list
     def __init__(self):
+        BasicYAML.__init__(self)
+        self._attributes['group_id'] = 0
+        self._attributes['agents_number'] = 0
+        self._attributes['agents_name'] = []
+        self._attributes['x'] = 0.0
+        self._attributes['y'] = 0.0
+
+        # dict key (group_id) with str type
         self._agents = {}
 
     def load(self, yaml_node):
-        for agent in yaml_node :
-            group_id = str(agent[2])
+        # each lists will be 
+        # {group_id:, agents_number: , agents_name: , x: , y: }
+        for agent_group in yaml_node :
+            # trivial case
+            if agent_group['group_id'] is None:
+                raise ValueError("missing 'group_id' for agent_list")
+
+            group_id = str(agent_group['group_id'])
+            agents_number = 0
+            spawn_x = 0.0
+            spawn_y = 0.0
+
+            if agent_group['agents_name'] :
+                agents_name = agent_group['agents_name']
+                agents_number = len(agents_name)
+            elif agent_group['agents_number'] :
+                agents_number = int(agent_group['agents_number'])
+            else :
+                raise ValueError("at leaset 'agents_name' or 'agents_number' provided for agent list")
+
+            if agent_group['x'] and agent_group['y'] :
+                spawn_x = float(agent_group['x'])
+                spawn_y = float(agent_group['y'])
+
+            # add all the agent positions in the dict
             if not group_id in self._agents :
                 self._agents[group_id] = []
-            self._agents[group_id].append(PointYAML(agent[0], agent[1]))
+            for i in range(agents_number) :
+                self._agents[group_id].append(PointYAML(spawn_x, spawn_y))
 
     def allGroupId(self):
         return self._agents.keys()
@@ -257,9 +293,9 @@ class ObstacleSetYAML (BasicYAML) :
     def __init__(self) :
         BasicYAML.__init__(self)
         self._attributes['class'] = 'obstacleSetId'
-        self._attributes['file_name'] = None
+        self._attributes['file_name'] = ''
         self._attributes['type'] = 'nav_mesh'
-        self._obstacle_set = None
+        self._obstacle_set = set()
 
     def load(self, yaml_node) :
         BasicYAML.load(self, yaml_node)
@@ -271,7 +307,7 @@ class ObstacleSetYAML (BasicYAML) :
         self._obstacle_set.setNavMeshFile(self._attributes['file_name'])
         self._obstacle_set.setClassId(self._attributes['class'])
         return self._obstacle_set        
-        
+    
 
 if __name__ == '__main__' :
     import yaml

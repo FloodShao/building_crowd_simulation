@@ -181,6 +181,8 @@ levels:
       - [2681.277, 665.548, 0, conf1]
       - [2743.3, 369.749, 0, conf1]
       - [721.6609999999999, 414.579, 0, store]
+      - [1790.467, 1326.218, 0, magni2_charger, {is_charger: [4, true], is_parking_spot: [4, true], spawn_robot_name: [1, magni2], spawn_robot_type: [1, Magni]}]
+      - [1364.76, 1336.717, 0, magni1_charger, {is_charger: [4, true], is_parking_spot: [4, true], spawn_robot_name: [1, magni1], spawn_robot_type: [1, Magni]}]
     walls:
       - [7, 6, {}]
       - [27, 26, {}]
