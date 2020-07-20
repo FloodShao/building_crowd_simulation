@@ -222,10 +222,18 @@ def main():
         level_vertices = navmesh_generator.get_transformed_vertices()
         goal_area = set()
         level_config['goals'] = []
+        # counting the external agent name from vertices (specifically for spawned robot)
+        external_agent = []
         
         for v in level_vertices :
+            # no specified vertices name
             if len( v.getName() ) == 0 :
-                continue    
+                continue   
+            # specified vertices name, e.g. robot sqawn point, robot lane stop point
+            if v.getParams() and 'spawn_robot_name' in v.getParams() :
+                external_agent.append(v.getParams()['spawn_robot_name'][1])
+                continue
+            # the rest is humen lane goals
             goal_area.add(v.getName())
             level_config['goals'].append(v)
         
@@ -239,11 +247,22 @@ def main():
         level_config['obstacle_set'] = [ObstacleSetYAML().getAttributes()]
         level_config['agent_profile'] = [AgentProfileYAML().getAttributes()]
         level_config['agent_group'] = [AgentGroupYAML().getAttributes()]
-        level_config['agent_list'] = []
-        level_config['agent_list'].append( PointYAML(0.0, 0.0) )
+
+        # template external agents
+        external_agent_group = AgentsListYAML()
+        external_agent_group.setAttributes('group_id', str(0))
+        external_agent_group.setAttributes('agents_number', '')
+        external_agent_group.setAttributes('agents_name', external_agent)
+
+        level_config['agent_list'] = [external_agent_group.getAttributes()]
         
         # generate template config file
         templateYamlFile(level_name, level_config, conf_template_file)
+        if conf_template_file[0] == '/' :
+            # start from root directory
+            print("Generate: ", conf_template_file)
+        else :
+            print("Generate: ", os.getcwd() + '/' + conf_template_file)
 
 if __name__ == "__main__":
     sys.exit(main())

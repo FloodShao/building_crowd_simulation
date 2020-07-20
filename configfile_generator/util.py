@@ -35,7 +35,10 @@ def writeXmlFile(root_element, output_dir = '', file_name = '') :
         print("Warning: 'output_dir' is not specified. Write file to ", os.getcwd())
         output_dir = os.getcwd()
     else :
-        print("Generate", file_name, "to ", output_dir)
+        if output_dir[0] == '/':
+            print("Generate", file_name, "to ", output_dir)
+        else: 
+            print("Generate", file_name, "to ", os.getcwd() + '/' + output_dir)
 
     tree.write(output_dir + '/' + file_name, encoding='utf-8')
 
@@ -57,14 +60,13 @@ def templateYamlFile(level_name, tree, output_file) :
                 content_text = "- [" + str(item.x) + ", " + str(item.y) + ", " + str(item.z) + ", " + str(item.name) + "]"
             elif key == "goal_area" :
                 content_text = "- " + item
-            elif key == "agent_list" :
-                # for PointYAML item
-                content_text = "- [" + str(item._x) + ", " + str(item._y) + ", " + str(item._name) + "]"
             else:
                 content_text = "- {"
                 for k in item :
                     content_text += k + ": " + str(item[k]) + ", "
-                content_text = content_text[0:-2] # delete the last ", "
+                
+                # delete the last ", "
+                content_text = content_text[0:-2] 
                 content_text += "}"
 
             templatePrettyYaml(filehandle, indent_level+1, content_text)
