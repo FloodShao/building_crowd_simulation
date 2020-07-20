@@ -91,7 +91,7 @@ def main():
         config_yaml_path = sys.argv[1]
         output_dir = sys.argv[2]
     else: 
-        sts.exit(1)
+        sys.exit(1)
         raise ValueError("Please provide config_yaml_path and the output_dir as required.")
     
     if not os.path.exists(config_yaml_path):
