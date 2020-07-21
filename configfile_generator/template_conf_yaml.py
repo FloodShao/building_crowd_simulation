@@ -1,5 +1,6 @@
 from .behavior_file import *
 from .scene_file import *
+from .plugin_file import *
 
 class PointYAML :
     def __init__(self, x, y) :
@@ -27,8 +28,12 @@ class BasicYAML :
         self._attributes[key] = value
 
     def load(self, yaml_node):
+        self.clear()
         for key in yaml_node :
             self._attributes[key] = yaml_node[key]
+
+    def clear(self):
+        self._attributes = {}
 
 
 class StateYAML (BasicYAML):
@@ -306,8 +311,48 @@ class ObstacleSetYAML (BasicYAML) :
         self._obstacle_set = ObstacleSet()
         self._obstacle_set.setNavMeshFile(self._attributes['file_name'])
         self._obstacle_set.setClassId(self._attributes['class'])
-        return self._obstacle_set        
-    
+        return self._obstacle_set       
+
+
+class ModelTypeYAML (BasicYAML) :
+
+    def __init__(self):
+        BasicYAML.__init__(self)
+        self._attributes['type_name'] = ''
+        self._attributes['animation_speed'] = ''
+        self._attributes['animation_file'] = ''
+        self._attributes['gazebo'] = {'filename': '', 'initial_pose': [0, 0, 0, 0, 0, 0]}
+        self._attributes['ign'] = {'model_file_path': '', 'initial_pose': [0, 0, 0, 0, 0, 0]}
+
+    def load(self, yaml_node):
+        BasicYAML.load(self, yaml_node)
+        model_type = ModelType()
+        params = self.getAttributes()
+        for key in params:
+            model_type.setElement(key, params[key])
+        
+        return model_type
+
+
+class ExternalAgentYAML (BasicYAML):
+
+    def __init__(self):
+        BasicYAML.__init__(self)
+        self._external_agent = set()
+
+    def load(self, yaml_node):
+        BasicYAML.load(self, yaml_node)
+        # yaml_node should be one line in agent_group, to find the agent group with class 0
+        if not 'agents_name' in self._attributes or not 'group_id' in self._attributes :
+            return
+
+        if self._attributes['group_id'] == str(0) :
+            for name in self._attributes['agents_name'] :
+                self._external_agent.add(str(name))
+        
+    def getExternalAgents(self) :
+        return list(self._external_agent)
+
 
 if __name__ == '__main__' :
     import yaml

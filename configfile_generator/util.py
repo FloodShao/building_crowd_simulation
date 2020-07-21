@@ -23,14 +23,6 @@ def prettyXml(element, indent, newline, level = 0) :
 
 
 def writeXmlFile(root_element, output_dir = '', file_name = '') :
-    if not ET.iselement(root_element) :
-        raise ValueError("Failed to write xml file. Invalid element provided!")
-
-    prettyXml(root_element, '\t', '\n')
-    
-    # ET.dump(root_element)
-    tree = ET.ElementTree(root_element)
-
     if len(output_dir) == 0:
         print("Warning: 'output_dir' is not specified. Write file to ", os.getcwd())
         output_dir = os.getcwd()
@@ -40,10 +32,22 @@ def writeXmlFile(root_element, output_dir = '', file_name = '') :
         else: 
             print("Generate", file_name, "to ", os.getcwd() + '/' + output_dir)
 
-    tree.write(output_dir + '/' + file_name, encoding='utf-8')
+    writeXMLtoCompleteFilePath(root_element, output_dir + '/' + file_name)
 
-def templateYamlFile(level_name, tree, output_file) :
-    filehandle = open(output_file, "w")
+
+def writeXMLtoCompleteFilePath(root_element, file_name = '') :
+    if not ET.iselement(root_element) :
+        raise ValueError("Failed to write xml file. Invalid element provided!")
+
+    prettyXml(root_element, '\t', '\n')
+
+    # ET.dump(root_element)
+    tree = ET.ElementTree(root_element)
+    tree.write(file_name, encoding='utf-8')
+
+
+def templateYamlFile(level_name, tree, output_file, write_mode) :
+    filehandle = open(output_file, write_mode)
     newline = '\n'
     indent = ' '
     

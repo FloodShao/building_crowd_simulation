@@ -175,6 +175,85 @@ class BuildingYamlParse:
             return
         return self._level_raw[key]
 
+
+def navmesh_output(level_name, level_yaml_node, output_file_path):
+    # TODO, add graph_id support
+    navmesh_generator = NavmeshGenerator(level_yaml_node, level_name)
+    navmesh_generator.Load()
+    navmesh_generator.Generate()
+    navmesh_generator.Output(output_file_path)
+
+    # provide lane vertices for goals 
+    return navmesh_generator
+
+
+def configfile_level_output(level_name, navmesh_generator, configfile_output_file):
+    
+    level_config = {}
+    # behavior file related tag: 'goals', 'state', 'transition', 'goal_set', 'goal_area'
+    level_vertices = navmesh_generator.get_transformed_vertices()
+    goal_area = set()
+    external_agent = []
+    level_config['goals'] = []
+    
+    for v in level_vertices :
+        # vertices without specified name are not goals
+        if len( v.getName() ) == 0 :
+            continue   
+        # specified vertices name, e.g. robot sqawn point, robot lane stop point
+        if v.getParams() and 'spawn_robot_name' in v.getParams() :
+            external_agent.append(v.getParams()['spawn_robot_name'][1])
+            continue
+        
+        goal_area.add(v.getName())
+        level_config['goals'].append(v)
+    
+    # generate template
+    level_config['state'] = [StateYAML().getAttributes()]
+    level_config['transition'] = [TransitionYAML().getAttributes()]
+    level_config['goal_set'] = [GoalSetYAML().getAttributes()]
+    level_config['goal_area'] = list(goal_area)
+
+    # scene file related, tag: 'obstacle_set', 'agent_profile', 'agent_group'
+    level_config['obstacle_set'] = [ObstacleSetYAML().getAttributes()]
+    level_config['agent_profile'] = [AgentProfileYAML().getAttributes()]
+    level_config['agent_group'] = [AgentGroupYAML().getAttributes()]
+
+    # predefined external agents
+    external_agent_group = AgentsListYAML()
+    external_agent_group.setAttributes('group_id', str(0))
+    external_agent_group.setAttributes('agents_number', '')
+    external_agent_group.setAttributes('agents_name', external_agent)
+
+    level_config['agent_list'] = [external_agent_group.getAttributes()]
+    
+    # generate template config file
+    write_mode = "a" # append one level to the config file
+    templateYamlFile(level_name, level_config, configfile_output_file, write_mode)
+
+def configfile_plugin_output(configfile_output_file):
+    filehandle = open(configfile_output_file, "a")
+    newline = '\n'
+    indent = ' '
+    indent_level = 0
+
+    model_type_list = [ModelTypeYAML().getAttributes()]
+    templatePrettyYaml(filehandle, indent_level, 'model_type' + ':')
+    indent_level = indent_level + 1
+
+    for item in model_type_list :
+        # print key
+        content = '- {'
+        for key in item:
+            content += str(key) + ": " + str(item[key]) + ', '
+        content = content[0:-2]  #delete the last ', '
+        content += ' }'
+        templatePrettyYaml(filehandle, indent_level, content)
+    
+    filehandle.close()
+
+
+
 def main():
     if len(sys.argv) > 1 :
         map_path = sys.argv[1]
@@ -203,66 +282,29 @@ def main():
     yaml_parse = BuildingYamlParse(map_path)
 
     # template configure file for menge
-    conf_template_file = output_folder_path + '/' + 'template_conf_menge.yaml'
+    configfile_output_file = output_folder_path + '/' + 'template_conf_menge.yaml'
+
+    clear_filehandle = open(configfile_output_file, "w")
 
     for level_name in yaml_parse._level_keys :
-        output_file = output_folder_path + '/' + level_name + "_navmesh.nav"
+        # navmesh output
+        navmesh_output_file = output_folder_path + '/' + level_name + "_navmesh.nav"
         level_yaml_node = yaml_parse.GeteRawData()[level_name]
-        name = level_name
+        navmesh_generator = navmesh_output(level_name, level_yaml_node, navmesh_output_file)
+        # configfile menge part output
+        configfile_level_output(level_name, navmesh_generator, configfile_output_file)
 
-        # TODO, add graph_id support
-        navmesh_generator = NavmeshGenerator(level_yaml_node, name)
-        navmesh_generator.Load()
-        navmesh_generator.Generate()
-        navmesh_generator.Output(output_file)
+    # configfile plugin part output
+    configfile_plugin_output(configfile_output_file)
+    clear_filehandle.close()
 
-        # generate template config file
-        level_config = {}
-        # behavior file related
-        level_vertices = navmesh_generator.get_transformed_vertices()
-        goal_area = set()
-        level_config['goals'] = []
-        # counting the external agent name from vertices (specifically for spawned robot)
-        external_agent = []
-        
-        for v in level_vertices :
-            # no specified vertices name
-            if len( v.getName() ) == 0 :
-                continue   
-            # specified vertices name, e.g. robot sqawn point, robot lane stop point
-            if v.getParams() and 'spawn_robot_name' in v.getParams() :
-                external_agent.append(v.getParams()['spawn_robot_name'][1])
-                continue
-            # the rest is humen lane goals
-            goal_area.add(v.getName())
-            level_config['goals'].append(v)
-        
-        level_config['state'] = [StateYAML().getAttributes()]
-        level_config['transition'] = [TransitionYAML().getAttributes()]
-        level_config['goal_set'] = [GoalSetYAML().getAttributes()]
-        level_config['goal_area'] = list(goal_area)
+    # log
+    if configfile_output_file[0] == '/' :
+        # start from root directory
+        print("Generate: ", configfile_output_file)
+    else :
+        print("Generate: ", os.getcwd() + '/' + configfile_output_file)
 
-        # scene file related
-
-        level_config['obstacle_set'] = [ObstacleSetYAML().getAttributes()]
-        level_config['agent_profile'] = [AgentProfileYAML().getAttributes()]
-        level_config['agent_group'] = [AgentGroupYAML().getAttributes()]
-
-        # template external agents
-        external_agent_group = AgentsListYAML()
-        external_agent_group.setAttributes('group_id', str(0))
-        external_agent_group.setAttributes('agents_number', '')
-        external_agent_group.setAttributes('agents_name', external_agent)
-
-        level_config['agent_list'] = [external_agent_group.getAttributes()]
-        
-        # generate template config file
-        templateYamlFile(level_name, level_config, conf_template_file)
-        if conf_template_file[0] == '/' :
-            # start from root directory
-            print("Generate: ", conf_template_file)
-        else :
-            print("Generate: ", os.getcwd() + '/' + conf_template_file)
 
 if __name__ == "__main__":
     sys.exit(main())
