@@ -14,8 +14,11 @@ class LeafElement:
         for key in attributes:
             self.addAttribute(key, attributes[key])
 
-    def addText(self, text):
+    def setText(self, text):
         self._text = str(text)
+
+    def getText(self) :
+        return self._text
 
     def outputXmlElement(self):
         root = ET.Element(self._name, self._attrib)
