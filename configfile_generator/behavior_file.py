@@ -88,15 +88,13 @@ class StateTransition (Element):
 
     def __init__(self) :
         Element.__init__(self, 'Transition')
-        self.addAttribute('from', None)
-        self.addAttribute('to', None)
+        self.addAttribute('from', '')
+        self.addAttribute('to', '')
         self._condition = TransitionCondition() 
         self._target = TransitionTarget()
-        self.addSubElement(self._condition)
-        self.addSubElement(self._target)
     
     def setFromState(self, state) :
-        if state.getStateName() != None :
+        if state.getStateName() != '' :
             self.addAttribute('from', state.getStateName())
         else :
             raise ValueError("The transition FromState provided is not a xml element")
@@ -108,7 +106,7 @@ class StateTransition (Element):
             raise ValueError("Invalid state name for state transition")
 
     def setToState(self, state):
-        if state.getStateName() != None :
+        if state.getStateName() != '' :
             self.addAttribute('to', state.getStateName())
         else :
             raise ValueError("The transition ToState provided is not a xml element")
@@ -125,9 +123,11 @@ class StateTransition (Element):
     def parseCondition(self, condition_params) :
         # recommended method to set a condition for transition
         self._condition.parseCondition(condition_params)
+        self.addSubElement(self._condition)
 
     def parseTarget(self, target_params) :
         self._target.parseTarget(target_params)
+        self.addSubElement(self._target)
 
 
 class TransitionCondition (Element):
