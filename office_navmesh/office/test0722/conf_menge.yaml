@@ -73,20 +73,20 @@ L1:
   - {name: 'external_agent', class: 1, max_accel: 0, max_angle_vel: 0, max_neighbors: 10, max_speed: 0, neighbor_dist: 5, obstacleSet: 1, pref_speed: 0, r: 0.25, ORCA_tau: 1.0, ORCA_tauObst: 0.4}
   - {name: 'human', class: 1, max_accel: 5, max_angle_vel: 180, max_neighbors: 10, max_speed: 3, neighbor_dist: 10, obstacleSet: 1, pref_speed: 1, r: 0.25, ORCA_tau: 1.0, ORCA_tauObst: 0.4}
  agent_group:
-  - {group_id: '0', profile_selector: external_agent, state_selector: static}
-  - {group_id: '1', profile_selector: human, state_selector: common_walking}
+  - {group_id: 0, profile_selector: external_agent, state_selector: static}
+  - {group_id: 1, profile_selector: human, state_selector: common_walking}
  agent_list:
-  - {group_id: '0', agents_number: , agents_name: ['magni2', 'magni1'], x: 0.0, y: 0.0}
-  - {group_id: '1', agents_number: 5, agents_name: , x: 18.71932562411382, y: -3.7547856132592172}
+  - {group_id: 0, agents_number: , agents_name: ['magni2', 'magni1'], x: 0.0, y: 0.0}
+  - {group_id: 1, agents_number: 5, agents_name: , x: 18.71932562411382, y: -3.7547856132592172}
 
 model_type:
-  - {typename: 'human',
+  - {type_name: 'human',
      animation_speed: 0.2,
      animation: 'walk',
      gazebo: {filename: walk.dae, initial_pose: [0, 0, 0, 0, 0, 0]},
      ign: {model_file_path: https://fuel.ignitionrobotics.org/1.0/Mingfei/models/actor, initial_pose: [0, 0, 0, 0, 0, 0]}
     }
-  - {typename: 'running_human',
+  - {type_name: 'running_human',
      animation_speed: 0.2,
      animation: 'walk',
      gazebo: {filename: walk.dae, initial_pose: [0, 0, 0, 0, 0, 0]},

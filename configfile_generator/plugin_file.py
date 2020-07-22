@@ -58,7 +58,7 @@ class ModelType (Element) :
 
     def __init__(self) :
         Element.__init__(self, 'model_type')
-        self._type_name = LeafElement('type_name')
+        self._type_name = LeafElement('typename')
         self._animation_speed = LeafElement('animation_speed')
         self._animation = LeafElement('animation')
         # for gazebo model
@@ -78,7 +78,7 @@ class ModelType (Element) :
         self._model_env = model_env
 
     def setElement(self, key, value) :
-        if key == "type_name" :
+        if key == "typename" :
             self._type_name.setText(value)
             return
 

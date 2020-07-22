@@ -112,8 +112,9 @@ def load_plugin(yaml_node, model_env) :
         
         # for each level
         if 'agent_list' in yaml_node[key] :
-            external_agent_yaml.load(yaml_node[key])
-    
+            for item in yaml_node[key]['agent_list'] :
+                external_agent_yaml.load(item)
+            
     plugin.addExternalAgentList(external_agent_yaml.getExternalAgents())
     return plugin
 
@@ -165,7 +166,7 @@ def main():
         raise ValueError('Map path not exist!: ' + config_yaml_path)
 
     if not os.path.exists(output_dir):
-        os.mkdir(output_dir)
+        os.makedirs(output_dir)
     
     yaml_parse = BuildConfigYaml(config_yaml_path)
     yaml_node = yaml_parse.getLevelData('L1')

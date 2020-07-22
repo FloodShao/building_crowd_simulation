@@ -390,19 +390,21 @@
 			<scene_file>scene_file.xml</scene_file>
 			<update_time_step>0.1</update_time_step>
 			<model_type>
-				<type_name>human</type_name>
+				<typename>human</typename>
 				<animation>walk</animation>
 				<animation_speed>0.2</animation_speed>
 				<initial_pose>0 0 0 0 0 0</initial_pose>
 				<filename>walk.dae</filename>
 			</model_type>
 			<model_type>
-				<type_name>running_human</type_name>
+				<typename>running_human</typename>
 				<animation>walk</animation>
 				<animation_speed>0.2</animation_speed>
 				<initial_pose>0 0 0 0 0 0</initial_pose>
 				<filename>walk.dae</filename>
 			</model_type>
+			<external_agent>magni2</external_agent>
+			<external_agent>magni1</external_agent>
 		</plugin>
 	</world>
 </sdf>

@@ -273,22 +273,27 @@ def main():
         output_folder_path = sys.argv[2]
         if not os.path.exists(output_folder_path) :
             print("Creating output folder path: ", output_folder_path)
-            os.mkdir(output_folder_path)
+            os.makedirs(output_folder_path)
     else:
-        output_folder_path = "navmesh_output/"
+        output_folder_path = os.getcwd() + "navmesh_output"
         if not os.path.exists(output_folder_path) :
-            os.mkdir(output_folder_path)
+            os.makedirs(output_folder_path)
+
+    if len(sys.argv) > 3 :
+        output_file_prefix = sys.argv[3]
+    else :
+        output_file_prefix = 'tmp'
 
     yaml_parse = BuildingYamlParse(map_path)
 
     # template configure file for menge
-    configfile_output_file = output_folder_path + '/' + 'template_conf_menge.yaml'
+    configfile_output_file = output_folder_path + '/' + output_file_prefix + '.template_conf_menge.yaml'
 
     clear_filehandle = open(configfile_output_file, "w")
 
     for level_name in yaml_parse._level_keys :
         # navmesh output
-        navmesh_output_file = output_folder_path + '/' + level_name + "_navmesh.nav"
+        navmesh_output_file = output_folder_path + '/' + output_file_prefix + '.' + level_name + ".navmesh.nav"
         level_yaml_node = yaml_parse.GeteRawData()[level_name]
         navmesh_generator = navmesh_output(level_name, level_yaml_node, navmesh_output_file)
         # configfile menge part output
