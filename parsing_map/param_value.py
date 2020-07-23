@@ -1,5 +1,5 @@
 class ParamValue:
-    UNDEFINE = 0
+    UNDEFINED = 0
     STRING = 1
     INT = 2
     DOUBLE = 3

@@ -1,10 +1,11 @@
 from collections import Iterable
 import sys
-from vector import Vector2d
-from vertex import Vertex, VertexManager
-from edge import Edge, EdgeManager
-from obstacle import Obstacle, ObstacleManager
+import os
 
+from .vector import Vector2d
+from .vertex import Vertex, VertexManager
+from .edge import Edge, EdgeManager
+from .obstacle import Obstacle, ObstacleManager
 
 def calIntersectVertexFromLaneVector(lane_vector, id0, id1, orign_point):
     ## calculate the intersection vertex within the area from vector0 to vector1, mind the sequence
@@ -17,7 +18,8 @@ def calIntersectVertexFromLaneVector(lane_vector, id0, id1, orign_point):
     vector1 = lane_vector[id1][1]
 
     ## special case with 2 lanes are parallel, use the mid point as the intersection point
-    if(vector0.getDot(vector1.getNormalUnit()) == 0) :
+    # note that when 2 lanes are nearly parallel, not using the special case might cause rediculous result.
+    if(abs( vector0.getUnit().getDot(vector1.getNormalUnit()) ) < 0.1) :
         length = (lane0_width + lane1_width) / 2
         ## vector0 x result_vector must be > 0
         result_x = length * vector0.getNormalUnit().x
@@ -162,12 +164,17 @@ class PolygonFactory:
         # must be a lane node
         assert(polygon.getIntersectVertexId() == -1)
         lane = self.laneManager.getLane(polygon.getLaneId())
-
-        v0 = self.laneVertexManager.getLaneVertex(list(lane.getLaneVertices())[0])
-        v1 = self.laneVertexManager.getLaneVertex(list(lane.getLaneVertices())[1])
+        
+        if list(lane.getLaneVertices())[0] == lane_vertex_id :
+            v0 = self.laneVertexManager.getLaneVertex(list(lane.getLaneVertices())[1])
+            v1 = self.laneVertexManager.getLaneVertex(list(lane.getLaneVertices())[0])
+        else :
+            v0 = self.laneVertexManager.getLaneVertex(list(lane.getLaneVertices())[0])
+            v1 = self.laneVertexManager.getLaneVertex(list(lane.getLaneVertices())[1])
         
         lane_vector = Vector2d([0.0, 0.0])
         lane_vector.initWith2P(v0, v1)
+        lane_vector_unit = lane_vector.getUnit()
         lane_normal_unit0 = lane_vector.getNormalUnit()
         lane_normal_unit1 = Vector2d([-lane_normal_unit0.x, -lane_normal_unit0.y])
 
@@ -175,12 +182,11 @@ class PolygonFactory:
         lane_width = lane.getWidth()
 
         new_vertex0 = Vertex(
-            [orign_point.x + 0.5 * lane_width * lane_normal_unit0.x, 
-             orign_point.y + 0.5 * lane_width * lane_normal_unit0.y])
+            [orign_point.x + 0.5 * lane_width * (lane_normal_unit0.x + lane_vector_unit.x), 
+             orign_point.y + 0.5 * lane_width * (lane_normal_unit0.y + lane_vector_unit.y) ])
         new_vertex1 = Vertex(
-            [orign_point.x + 0.5 * lane_width * lane_normal_unit1.x,
-             orign_point.y + 0.5 * lane_width * lane_normal_unit1.y]
-        )
+            [orign_point.x + 0.5 * lane_width * (lane_normal_unit1.x + lane_vector_unit.x),
+             orign_point.y + 0.5 * lane_width * (lane_normal_unit1.y + lane_vector_unit.y) ])
 
         return [new_vertex0, new_vertex1]
 
@@ -488,17 +494,14 @@ class FileWriter:
 
     def generateNavMesh(self):
         # vertex part
-        print("Write vertices...")
         self.writeLine(self.vertexManager.getSize())
         for i in range(self.vertexManager.getSize()):
             v = self.vertexManager.getVertex(i)
-            print(v.getId(), v.getCoords())
+            # print(v.getId(), v.getCoords())
             self.writeLine(v.getCoords())
         self.writeLine(" ")
         
         # edge part
-        print("complete.")
-        print("Write edges...")
         self.writeLine(self.edgeManager.getSize())
         for i in range(self.edgeManager.getSize()):
             e = self.edgeManager.getEdge(i)
@@ -506,8 +509,6 @@ class FileWriter:
         self.writeLine(" ")
 
         # obstacle part
-        print("complete.")
-        print("Write obstalces...")
         self.writeLine(self.obstacleManager.getSize())
         for i in range(self.obstacleManager.getSize()):
             o = self.obstacleManager.getObstacle(i)
@@ -515,8 +516,6 @@ class FileWriter:
         self.writeLine(" ")
 
         # polygon part
-        print("complete.")
-        print("Write node...")
         # nodes name
         self.filehandle.write("walkable")
         self.filehandle.write("\n")
@@ -551,7 +550,7 @@ class FileWriter:
             # blank
             self.writeLine(" ")
 
-
-
-            
-        
+        if self.filename[0] == '/' :
+            print("Generate: ", self.filename)
+        else :
+            print("Generate: ", os.getcwd() + '/' + self.filename)

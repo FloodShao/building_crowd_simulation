@@ -1,8 +1,4 @@
-from vertex import Vertex
-from lane_vertex import LaneVertex, LaneVertexManager
-from lane import Lane, LaneManager
-from vector import Vector2d
-import util
+from .vertex import Vertex
 
 class Polygon:
     

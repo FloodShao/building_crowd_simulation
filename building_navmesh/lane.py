@@ -1,6 +1,3 @@
-import util
-from vector import Vector2d
-
 class Lane:
     def __init__(self, params):
         # params have 3 variable, params[0] and params[1] indicate the vertices id for this lane
@@ -34,8 +31,6 @@ class Lane:
              self.lane_vertices[0], " and ", self.lane_vertices[1])
         assert self.lane_vertices[0] != self.lane_vertices[1]
         return list(self.lane_vertices)
-
-
 
 
 class LaneManager:
