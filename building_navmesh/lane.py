@@ -1,9 +1,9 @@
 class Lane:
+
     def __init__(self, params):
-        # params have 3 variable, params[0] and params[1] indicate the vertices id for this lane
-        # params[2] indicate the width of this lane
-        self.width = params[2]
+        # params for [lane_vertex0, lane_vertex1, width]
         self.lane_vertices = params[0:2]
+        self.width = params[2]
         self.vertices = []
         self.verticesSet = set()
 
@@ -48,7 +48,3 @@ class LaneManager:
     def getLane(self, id):
         assert(id < self.getSize())
         return self.lanes[id]
-
-
-
-        

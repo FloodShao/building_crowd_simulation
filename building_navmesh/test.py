@@ -1,15 +1,17 @@
 from .lane import Lane, LaneManager
 from .lane_vertex import LaneVertex, LaneVertexManager
-from .util import ConnectionManager, PolygonFactory
+from .util import PolygonFactory
 from .polygon import Polygon, PolygonManager
 from .vertex import Vertex, VertexManager
 from .edge import Edge, EdgeManager
 from .util import FileWriter
 from .obstacle import Obstacle, ObstacleManager
+from .connection import ConnectionManager
 
 file_name = "test_navmesh.nav"
 
-if __name__ == "__main__":
+
+def main():
 
     laneVertexManager = LaneVertexManager()
     laneManager = LaneManager()
@@ -75,3 +77,6 @@ if __name__ == "__main__":
     navmesh_file.openFile()
     navmesh_file.generateNavMesh()
     navmesh_file.closeFile()
+
+if __name__ == "__main__":
+    main()

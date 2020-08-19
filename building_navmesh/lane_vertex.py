@@ -38,7 +38,3 @@ class LaneVertexManager:
     def getLaneVertex(self, id):
         assert(id < self.getSize())
         return self.lane_vertices[id]
-
-    
-
-    

@@ -36,5 +36,3 @@ class VertexManager:
         id = self.getSize()
         vertex.setId(id)
         self.vertices.append(vertex)
-
-    

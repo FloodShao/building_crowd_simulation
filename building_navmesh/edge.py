@@ -1,4 +1,5 @@
 class Edge:
+    # edge for polygon
     
     def __init__(self):
         self.v0 = -1
@@ -45,4 +46,3 @@ class EdgeManager:
     def getEdge(self, id):
         assert(id < self.getSize())
         return self.edges[id]
-

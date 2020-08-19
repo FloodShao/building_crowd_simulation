@@ -55,7 +55,7 @@ def onSameSideOfLane(lane_vector, lane_vertex, vertex0, vertex1):
     else: 
         return False
 
-
+'''
 class ConnectionManager:
     def __init__(self, lane_vertices_manager, lane_manager):
         self.lane_vertices_manager = lane_vertices_manager
@@ -79,6 +79,7 @@ class ConnectionManager:
 
             v0.addLane(lane.getId())
             v1.addLane(lane.getId())
+'''
 
 class PolygonFactory:
     def __init__(self, polygonManager, laneVertexManager, laneManager, vertexManager, edgeManager, obstacleManager):

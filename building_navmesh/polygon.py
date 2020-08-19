@@ -8,10 +8,6 @@ class Polygon:
         self.edges = set()
         self.obstacles = set()
         self.gradient = [0, 0, 0] # equations for plane Ax+By+C = 0
-        # one node(convex polygon) can be either one intersection vertex or one lane
-        self.intersect_vertex_id = -1
-        self.intersect_lanes = [] # empty set
-        self.lane_id = -1 
 
     def setID(self, id):
         self.id = id
@@ -25,18 +21,18 @@ class Polygon:
         self.verticesIdSet.add(vertex.getId())
         self.vertices.append(vertex)
 
-    def getVertexSize(self):
-        return len(self.vertices)
-
     def getVertex(self):
         return list(self.vertices)
+
+    def getVertexSize(self):
+        return len(self.vertices)
 
     def addEdge(self, id):
         self.edges.add(id)
 
     def addEdges(self, edge_ids):
         for id in edge_ids:
-            self.edges.add(id)
+            self.addEdge(id)
     
     def getEdge(self):
         return list(self.edges)
@@ -46,26 +42,9 @@ class Polygon:
 
     def addObstacles(self, obstacle_ids):
         for id in obstacle_ids:
-            self.obstacles.add(id)
+            self.addObstacle(id)
 
-    def setIntersectVertexId(self, lane_vertex_id):
-        self.intersect_vertex_id = lane_vertex_id
-    
-    def getIntersectVertexId(self):
-        return self.intersect_vertex_id
-
-    def addIntersectLanes(self, lane_ids):
-        for id in lane_ids:
-            self.intersect_lanes.append(id)
-
-    def setLaneId(self, lane_id):
-        self.lane_id = lane_id
-
-    def getLaneId(self):
-        return self.lane_id
-    
-
-    def calCenter(self):
+    def calulateCenter(self):
         num = len(self.vertices)
         if(num < 3):
             print("Is not a polygon")
@@ -77,9 +56,9 @@ class Polygon:
             Y += vtx.y
         self.center = Vertex([X/num, Y/num])
 
-    def getVar(self):
+    def getVariables(self):
         result = []
-        self.calCenter()
+        self.calulateCenter()
         result.append(self.center.getCoords())
         vertices_id = []
         for v in self.vertices:
@@ -89,6 +68,35 @@ class Polygon:
         result.append(self.edges)
         result.append(self.obstacles)
         return result
+
+class HubPolygon (Polygon):
+    def __init__(self):
+        Polygon.__init__(self)
+        self.hubVertexId = -1
+        self.hubLanesId = []
+
+    def setHubVertexId(self, id):
+        self.hubVertexId = id
+    
+    def getHubVertexId(self) :
+        return self.hubVertexId
+
+    def addHubLane(self, lane_id):
+        self.hubLanesId.append(lane_id)
+
+    def addHubLanes(self, lanes_id):
+        for id in lanes_id:
+            self.addHubLane(id)
+
+class LanePolygon (Polygon):
+    def __init__(self):
+        Polygon.__init__(self)
+
+    def setLaneId(self, id):
+        self.laneId = id
+
+    def getLaneId(self) :
+        return self.laneId
 
 
 class PolygonManager:
@@ -122,8 +130,3 @@ class PolygonManager:
             return -1
         
         return self.polygon_map[intersect_vertex_id]
-
-    
-
-    
-            

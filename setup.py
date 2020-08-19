@@ -1,6 +1,6 @@
 from setuptools import setup
 
-package_name = 'building_navmesh_tools'
+package_name = 'building_crowd_simulation'
 
 setup(
     name=package_name,
@@ -25,6 +25,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            'building_navmesh = '
+            'building_navmesh.test:main',
             'navmesh_generator = '
             'navmesh_generator.navmesh_generator:main',
             'configfile_generator = '
