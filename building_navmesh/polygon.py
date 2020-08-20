@@ -56,7 +56,7 @@ class Polygon:
             Y += vtx.y
         self.center = Vertex([X/num, Y/num])
 
-    def getVariables(self):
+    def getVar(self):
         result = []
         self.calulateCenter()
         result.append(self.center.getCoords())
@@ -118,10 +118,8 @@ class PolygonManager:
 
     def updatePolygonSet(self, polygon):
         # if the polygon is an intersection node, should find the node by the intersection vertex
-        if(polygon.getIntersectVertexId() != -1 and polygon.getLaneId() == -1):
-            self.polygon_map[polygon.getIntersectVertexId()] = polygon.getId()
-            ## debug purpose
-            # print("update polygon set for polygon[ ", polygon.getId(), " ]")
+        if(isinstance(polygon, HubPolygon)) :
+            self.polygon_map[polygon.getHubVertexId()] = polygon.getId()
         
     def getPolygonIdFromIntersectVertexId(self, intersect_vertex_id):
         if(intersect_vertex_id not in self.polygon_map):

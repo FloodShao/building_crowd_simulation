@@ -1,15 +1,16 @@
-from .lane import Lane, LaneManager
-from .lane_vertex import LaneVertex, LaneVertexManager
-from .util import PolygonFactory
-from .polygon import Polygon, PolygonManager
-from .vertex import Vertex, VertexManager
-from .edge import Edge, EdgeManager
-from .util import FileWriter
-from .obstacle import Obstacle, ObstacleManager
-from .connection import ConnectionManager
+from building_navmesh.lane import Lane, LaneManager
+from building_navmesh.lane_vertex import LaneVertex, LaneVertexManager
+from building_navmesh.polygon import Polygon, HubPolygon, LanePolygon, PolygonManager
+from building_navmesh.vertex import Vertex, VertexManager
+from building_navmesh.edge import Edge, EdgeManager
+from building_navmesh.util import FileWriter
+from building_navmesh.obstacle import Obstacle, ObstacleManager
+from building_navmesh.connection import ConnectionManager
+from building_navmesh.polygon_factory import PolygonFactory
+
+import sys
 
 file_name = "test_navmesh.nav"
-
 
 def main():
 
@@ -59,14 +60,14 @@ def main():
         if(len(lane_vertex.getLanes()) < 2):
             continue
 
-        polygon = Polygon()
-        polygon.setIntersectVertexId( lane_vertex_id )
-        polygon.addIntersectLanes(lane_vertex.getLanes())
-        polygonFactory.intersectionPolygonUpdate(polygon)
+        polygon = HubPolygon()
+        polygon.setHubVertexId( lane_vertex_id )
+        polygon.addHubLanes(lane_vertex.getLanes())
+        polygonFactory.hubPolygonUpdate(polygon)
 
     ## add lane as node
     for lane_id in range(laneManager.getSize()):
-        polygon = Polygon()
+        polygon = LanePolygon()
         polygon.setLaneId(lane_id)
         polygonFactory.lanePolygonUpdate(polygon)
 
@@ -79,4 +80,4 @@ def main():
     navmesh_file.closeFile()
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
